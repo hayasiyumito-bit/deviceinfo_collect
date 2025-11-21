@@ -2,13 +2,11 @@ package com.android.device;
 
 import android.content.Context;
 import android.media.RingtoneManager;
-import android.os.Build;
 
 import com.android.assemble.CollectDeviceInfo;
 import com.android.device.appsflyer.AppsflyerInfo;
 import com.android.device.comm.Location;
 import com.android.device.comm.Net;
-import com.android.device.ext.XhsInfo;
 import com.android.device.hardware.Battery;
 import com.android.device.hardware.Gpu;
 import com.android.device.hardware.Hardware;
@@ -37,111 +35,23 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
 
 import java.util.TimeZone;
 
-
-import com.android.device.dynamic.DynamicCollect;
-
 public class DInfo {
     private static final String TAG = "DInfoTAG";
-
-    private static int prevState = 0;
-
-    /**
-     * 检查报告开关状态
-     *
-     * @param context         上下文对象
-     * @param biz             业务标识
-     * @param ownerSdkVersion SDK版本
-     * @param url             请求URL
-     * @param isDynamic       是否是动态报告
-     * @return 返回报告开关状态字符串
-     * @throws Exception 抛出异常
-     */
-    private static String checkReportSwitch(Context context, String biz, String ownerSdkVersion, String url, boolean isDynamic) throws Exception {
-        Map<String, String> params = new HashMap<>();
-        params.put("gaid", IDs.getGoogleADID(context));
-        params.put("biz", biz);
-
-        JSONObject request = new JSONObject();
-        String country = XhsInfo.getNetworkCountryIso(context);
-        request.put("country", "<absent>".equals(country) ? Locale.getDefault().getCountry() : country);
-        request.put("androidSdkVersion", String.valueOf(Build.VERSION.SDK_INT));
-        request.put("ownerSdkVersion", ownerSdkVersion);
-        request.put("packageName", context.getPackageName());
-
-        android.content.pm.PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-        request.put("packageVersion", packageInfo.versionName);
-
-        String result = Http.submitGetData(url, params, request.toString());
-        if (result.equals(Http.BAD_CONNECT)) {
-            return Http.BAD_CONNECT;
-        }
-
-        JSONObject response = new JSONObject(result);
-        if (response.getInt("code") != 0) {
-            return "disable";
-        }
-
-        if (isDynamic) {
-            JSONObject data = response.getJSONObject("data");
-            DynamicCollect.uploadParameter(data.getInt("cf"), data.getInt("rf"));
-        }
-        return "enable";
-    }
-
-    /**
-     * 开始动态数据收集
-     *
-     * @param context         上下文
-     * @param biz             业务类型
-     * @param ownerSdkVersion 所有者SDK版本
-     */
-    private static void startDynamicDataCollection(Context context, String biz, String ownerSdkVersion) {
-        DynamicCollect dynamicCollect = new DynamicCollect(context);
-        while (true) {
-            try {
-                if ("disable".equals(checkReportSwitch(context, biz, ownerSdkVersion, "https://iboot.site/dio/drsw", true))) {
-                    if (prevState == 1) {
-                        dynamicCollect.stop();
-                        prevState = 0;
-                    }
-                    SystemClock.sleep(60000);
-                } else {
-                    if (prevState == 0) {
-                        dynamicCollect.start();
-                        prevState = 1;
-                    }
-                    SystemClock.sleep(60000);
-                }
-            } catch (Exception e) {
-                if (prevState == 1) {
-                    dynamicCollect.stop();
-                    prevState = 0;
-                    return;
-                }
-            }
-        }
-    }
 
     /**
      * 获取设备信息并上传
      *
-     * @param context         上下文对象
-     * @param biz             业务标识
-     * @param ownerSdkVersion 所有者SDK版本
-     * @return 返回JSON格式的字符串或错误信息
+     * @param context 上下文对象
+     * @param biz     业务标识
      */
-    public static String getDInfo(Context context, String biz, String ownerSdkVersion) {
-
+    public static void getDInfo(Context context, String biz) {
         try {
             JSONObject jsonObject = new JSONObject();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmssZ", Locale.US);
@@ -202,12 +112,9 @@ public class DInfo {
                 }
             }
             if (!jsonObject.toString().isEmpty()) {
-                return Http.uploadData(jsonObject.toString(), "https://iboot.site/dio/rsd?biz=" + biz, biz);
-            } else {
-                return "empty";
+                Http.uploadData(jsonObject.toString(), "https://iboot.site/dio/rsd?biz=" + biz, biz);
             }
-        } catch (Exception e) {
-            return "error";
+        } catch (Exception ignored) {
         }
     }
 }
