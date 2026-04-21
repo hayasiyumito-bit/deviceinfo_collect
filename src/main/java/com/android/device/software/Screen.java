@@ -33,7 +33,7 @@ public final class Screen {
              */
             screenMode = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS_MODE);
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return screenMode;
     }
@@ -49,7 +49,7 @@ public final class Screen {
         try {
             screenBrightness = Settings.System.getInt(context.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS);
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return screenBrightness;
     }
@@ -67,7 +67,7 @@ public final class Screen {
             wm.getDefaultDisplay().getMetrics(outMetrics);
             return outMetrics.widthPixels + "*" + outMetrics.heightPixels + "*" + outMetrics.densityDpi;
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -85,7 +85,7 @@ public final class Screen {
             display.getRealSize(point);
             return point.x + "*" + point.y;
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }

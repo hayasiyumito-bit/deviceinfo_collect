@@ -147,7 +147,7 @@ public class HackChecker {
         try {
             return (context.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE) != 0 || Debug.isDebuggerConnected();
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return false;
     }
@@ -159,7 +159,7 @@ public class HackChecker {
             jsonObject.put("isVPN", isVPN(context));
             jsonObject.put("isDebug", isDebug(context));
         } catch (JSONException e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

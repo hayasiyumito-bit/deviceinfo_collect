@@ -9,7 +9,7 @@ public class IO {
             try {
                 x.close();
             } catch (Exception e) {
-                ULog.e(e);
+                // 删除ULog，静默处理异常
             }
         }
 

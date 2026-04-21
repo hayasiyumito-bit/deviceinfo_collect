@@ -6,7 +6,7 @@
 -allowaccessmodification
 -dontpreverify
 
-#-keep class com.android.device.DInfo{*;}
+#-keep class com.android.device.snapshot.DeviceSnapshot{*;}
 -keep class com.xxxx.sentry.Sentry{*;}
 -repackageclasses 'com.android.device'
 -repackageclasses 'com.xxxx.sentry'

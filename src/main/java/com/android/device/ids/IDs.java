@@ -47,10 +47,16 @@ public class IDs {
      */
     public static String getImei(Context context) {
         try {
-            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            return telephonyManager.getDeviceId();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                    TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                    if (telephonyManager != null) {
+                        return telephonyManager.getDeviceId();
+                    }
+                }
+            }
         } catch (Exception e) {
-            ULog.e(e);
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -82,8 +88,8 @@ public class IDs {
                 }
                 return buffer.toString();
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -119,8 +125,8 @@ public class IDs {
                     }
                 }
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -156,8 +162,8 @@ public class IDs {
                     }
                 }
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -180,8 +186,8 @@ public class IDs {
                     return telephonyManager.getSubscriberId();
                 }
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -202,7 +208,7 @@ public class IDs {
                 return Build.SERIAL;
             }
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -221,7 +227,7 @@ public class IDs {
                 return adid;
             }
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -240,8 +246,8 @@ public class IDs {
                     return telephonyManager.getSimSerialNumber();
                 }
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -254,12 +260,12 @@ public class IDs {
      */
     public static String getPhoneNumber(Context context) {
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_DENIED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                 TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 return manager.getLine1Number();
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -313,7 +319,7 @@ public class IDs {
             final String base = resources.getText(uaid).toString();
             return String.format(base, buffer, "Mobile ");
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -348,7 +354,7 @@ public class IDs {
 //            return android.util.Base64.encodeToString(wideVineId, Base64.NO_WRAP);
             res = MD5.stringToMD5(new String(wideVineId));
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return res;
     }
@@ -501,7 +507,7 @@ public class IDs {
             jsonObject.put("bootimage_utc", AFInAppEventType("ro.bootimage.build.date.utc"));
             jsonObject.put("getprop", Cmd.exe("getprop"));
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

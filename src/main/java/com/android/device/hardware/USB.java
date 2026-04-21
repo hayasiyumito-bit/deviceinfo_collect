@@ -39,7 +39,7 @@ public class USB {
         try {
             return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.ADB_ENABLED, 0) > 0;
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return false;
     }
@@ -56,7 +56,7 @@ public class USB {
             jsonObject.put("usb", getUsbStatus(context));
             jsonObject.put("adbEnable", adbEnable(context));
         } catch (JSONException e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

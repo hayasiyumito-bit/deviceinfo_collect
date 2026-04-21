@@ -109,7 +109,7 @@ public class Location {
                             jsonObject.put("latitude", bestLocation.getLatitude());
                             jsonObject.put("longitude", bestLocation.getLongitude());
                         } catch (JSONException e) {
-                            ULog.e(e);
+                            // 删除ULog，静默处理异常
                         }
                     }
 

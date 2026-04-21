@@ -68,7 +68,7 @@ public final class Media {
             jsonObject.put("alarm_max", max);
             jsonObject.put("alarm_cur", current);
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }
@@ -87,7 +87,7 @@ public final class Media {
                 return cursor.getCount();
             }
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -108,7 +108,7 @@ public final class Media {
             return String.valueOf(audioManager.getStreamVolume(AudioManager.STREAM_VOICE_CALL) + audioManager.getStreamVolume(AudioManager.STREAM_SYSTEM) + audioManager.getStreamVolume(AudioManager.STREAM_RING) +
                     audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) + audioManager.getStreamVolume(AudioManager.STREAM_ALARM));
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -133,7 +133,7 @@ public final class Media {
             try {
                 jsonObject.put("total", mCursor.getCount());
             } catch (Throwable e) {
-                ULog.e(e);
+                // 删除ULog，静默处理异常
             }
 
             while (mCursor.moveToNext()) {
@@ -206,7 +206,7 @@ public final class Media {
             try {
                 jsonObject.put("total", cursor.getCount());
             } catch (Throwable e) {
-                ULog.e(e);
+                // 删除ULog，静默处理异常
             }
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             while (cursor.moveToNext()) {
@@ -246,7 +246,7 @@ public final class Media {
             jsonObject.put("ls", jarr);
             cursor.close();
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }
@@ -347,7 +347,7 @@ public final class Media {
 //            jsonObject.put("videoList", getVideoList(context));
             jsonObject.put("mediaCodec", getMediaCodec());
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

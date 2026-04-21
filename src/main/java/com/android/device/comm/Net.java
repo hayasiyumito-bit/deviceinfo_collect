@@ -119,7 +119,7 @@ public class Net {
             }
             return result.toString();
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
             return "";
         }
     }
@@ -151,7 +151,7 @@ public class Net {
             }
             return result.toString();
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -180,11 +180,11 @@ public class Net {
                     jsonObject.put("dns", FormatString(dhcpInfo.dns1));
                 }
             } catch (Exception e) {
-                ULog.e(e);
+                // 删除ULog，静默处理异常
             }
             return jsonObject;
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return null;
     }
@@ -223,7 +223,7 @@ public class Net {
                 return sb.toString();
             }
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -427,7 +427,7 @@ public class Net {
                 return jsonArray;
             }
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return null;
     }
@@ -460,7 +460,7 @@ public class Net {
                 }
             }
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -522,7 +522,7 @@ public class Net {
             }
             return adr;
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
             return "";
         }
     }
@@ -565,7 +565,7 @@ public class Net {
                             }
                             gsmArr.put(gsm);
                         } catch (Throwable e) {
-                            ULog.e(e);
+                            // 删除ULog，静默处理异常
                         }
 
                     } else if (cellInfo instanceof CellInfoCdma) {
@@ -594,7 +594,7 @@ public class Net {
                             }
                             cdmaArr.put(cdma);
                         } catch (Throwable e) {
-                            ULog.e(e);
+                            // 删除ULog，静默处理异常
                         }
 
                     } else if (cellInfo instanceof CellInfoLte) {
@@ -622,7 +622,7 @@ public class Net {
                             }
                             lteArr.put(lte);
                         } catch (Throwable e) {
-                            ULog.e(e);
+                            // 删除ULog，静默处理异常
                         }
                     }
                 }
@@ -639,7 +639,7 @@ public class Net {
                 }
             }
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return cellInfo_json;
     }
@@ -686,7 +686,7 @@ public class Net {
             }
             return result;
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }
@@ -933,7 +933,7 @@ public class Net {
 
             return jsonObject;
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return null;
     }

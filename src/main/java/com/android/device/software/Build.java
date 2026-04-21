@@ -23,7 +23,7 @@ public class Build {
                 jsonObject.put(field.getName(), String.valueOf(field.get(null)));
             }
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         try {
             Field[] fields = android.os.Build.VERSION.class.getDeclaredFields();
@@ -32,7 +32,7 @@ public class Build {
                 jsonObject.put(field.getName(), String.valueOf(field.get(null)));
             }
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

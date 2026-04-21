@@ -87,7 +87,7 @@ public class Library {
             jsonObject.put("libraries", getLibraries(context));
             jsonObject.put("javaProperties", getJavaProperties());
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

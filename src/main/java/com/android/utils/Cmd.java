@@ -122,7 +122,7 @@ public final class Cmd {
             process.destroy();
             return sb.toString();
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
             return "";
         }
     }

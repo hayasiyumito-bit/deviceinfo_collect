@@ -86,7 +86,7 @@ public class Keyguard {
             jsonObject.put("isDeviceSecure", isDeviceSecure(context));
             jsonObject.put("inKeyguardRestrictedInputMode", inKeyguardRestrictedInputMode(context));
         } catch (JSONException e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

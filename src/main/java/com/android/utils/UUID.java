@@ -6,7 +6,7 @@ public final class UUID {
             java.util.UUID uuid = java.util.UUID.randomUUID();
             return MD5.stringToMD5(uuid.toString() + System.currentTimeMillis());
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return "";
     }

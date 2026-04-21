@@ -244,7 +244,7 @@ public final class Storage {
                 jsonObject.put("totalBytes", totalBytes);
             }
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }
@@ -262,7 +262,7 @@ public final class Storage {
             jsonObject.put("rootInfo", getRootSizeInfo(context));
             jsonObject.put("dataInfo", getDataSizeInfo(context));
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }

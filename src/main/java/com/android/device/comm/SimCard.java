@@ -35,7 +35,7 @@ public class SimCard {
             TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             return telephonyManager.hasIccCard();
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return false;
     }
@@ -58,7 +58,7 @@ public class SimCard {
                 }
             }
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return true;
     }
@@ -199,7 +199,7 @@ public class SimCard {
             }
 
         } catch (Throwable e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }
@@ -236,15 +236,15 @@ public class SimCard {
     public static String getSimSerialNumber(Context context) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_DENIED) {
+                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                     if (telephonyManager != null) {
                         return telephonyManager.getSimSerialNumber();
                     }
                 }
             }
-        } catch (Throwable e) {
-            ULog.e(e);
+        } catch (Exception e) {
+            // 权限不足时返回空字符串
         }
         return "";
     }
@@ -278,6 +278,12 @@ public class SimCard {
     public static JSONObject queryTelephonySimInfo(Context context) {
         JSONObject jsonObject = new JSONObject();
         try {
+            // 检查权限，避免SecurityException
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                    return jsonObject;
+                }
+            }
             Uri uri = Uri.parse("content://telephony/siminfo"); //访问raw_contacts表
             ContentResolver resolver = context.getContentResolver();
             Cursor cursor = resolver.query(uri, new String[]{"_id", "icc_id", "sim_id", "display_name", "carrier_name", "name_source", "color", "number", "display_number_format", "data_roaming", "mcc", "mnc"}, null, null, null);
@@ -290,14 +296,14 @@ public class SimCard {
                         try {
                             jsonObject.put(key, value);
                         } catch (JSONException e) {
-                            ULog.e(e);
+                            // 删除ULog，静默处理异常
                         }
                     }
                 }
                 cursor.close();
             }
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
         return jsonObject;
     }
@@ -397,7 +403,7 @@ public class SimCard {
             info.put("queryTelephonySimInfo", queryTelephonySimInfo(context));
             info.put("network", getWifiorMobile(context));
         } catch (Exception e) {
-            ULog.e(e);
+            // 删除ULog，静默处理异常
         }
 
         return info;
