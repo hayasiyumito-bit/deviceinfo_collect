@@ -1,5 +1,6 @@
 #include <jni.h>
-#include <string>
+#include <dlfcn.h>
+#include <cstring>
 
 #include <sys/system_properties.h>
 #include <android/sensor.h>
@@ -14,99 +15,103 @@ static const char kProvenanceWatermark[] =
         "YDC-7F3A9C2E-202607|device-collection|Yumito|CC-BY-NC-4.0";
 
 #define PROPERTY_VALUE_MAX 92
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_android_device_Jni_JniInterface_getSystemPropertyByFind(JNIEnv *env, jclass clazz,
-                                                                 jstring key) {
-    // 获取Java字符串的UTF-8编码C字符串表示
-    const char *keyStr = env->GetStringUTFChars(key, nullptr);
-    if (keyStr == nullptr) {
-        // 如果GetStringUTFChars返回nullptr，则抛出异常并返回
-        return env->NewStringUTF("Error: Unable to retrieve key string");
-    }
 
-    // 分配内存以存储系统属性的结果
-    char result[PROPERTY_VALUE_MAX]; // 使用Android系统定义的宏来分配足够的内存
-    result[0] = '\0'; // 初始化结果为空字符串
-
-    // 调用__system_property_get函数获取系统属性
-    int len = __system_property_get(keyStr, result);
-    if (len <= 0) {
-        // 如果获取系统属性失败，则结果可能为空字符串或发生错误
-        env->ReleaseStringUTFChars(key, keyStr); // 释放资源
-        return env->NewStringUTF("Error: Property not found or unable to retrieve");
-    }
-
-    // 释放Java字符串的UTF-8编码C字符串表示所占用的资源
-    env->ReleaseStringUTFChars(key, keyStr);
-
-    // 将结果转换为jstring并返回
-    jstring jStr = env->NewStringUTF(result);
-    return jStr;
-}
-
-extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_android_device_Jni_JniInterface_getLibcutilsPropertyGet(JNIEnv *env, jclass clazz,
-                                                                 jstring key) {
-    const char *keyStr = env->GetStringUTFChars(key, nullptr);
-    if (keyStr == nullptr) {
-        return env->NewStringUTF("");
-    }
-
+static jstring read_property_get(JNIEnv *env, const char *keyStr) {
     char result[PROPERTY_VALUE_MAX];
     result[0] = '\0';
     int len = __system_property_get(keyStr, result);
-    env->ReleaseStringUTFChars(key, keyStr);
+    if (len <= 0) {
+        return env->NewStringUTF("Error: Property not found or unable to retrieve");
+    }
+    return env->NewStringUTF(result);
+}
 
+static jstring read_property_find(JNIEnv *env, const char *keyStr) {
+    const prop_info *pi = __system_property_find(keyStr);
+    if (pi == nullptr) {
+        return env->NewStringUTF("Error: Property not found or unable to retrieve");
+    }
+    char name[PROP_NAME_MAX];
+    char value[PROP_VALUE_MAX];
+    if (__system_property_read(pi, name, value) <= 0 || value[0] == '\0') {
+        return env->NewStringUTF("Error: Property not found or unable to retrieve");
+    }
+    return env->NewStringUTF(value);
+}
+
+typedef int (*property_get_fn)(const char *, char *, const char *);
+
+static property_get_fn resolve_libcutils_property_get() {
+    static property_get_fn fn = nullptr;
+    static bool resolved = false;
+    if (resolved) {
+        return fn;
+    }
+    resolved = true;
+    void *handle = dlopen("libcutils.so", RTLD_NOW);
+    if (handle != nullptr) {
+        fn = reinterpret_cast<property_get_fn>(dlsym(handle, "property_get"));
+    }
+    return fn;
+}
+
+static jstring read_libcutils_property_get(JNIEnv *env, const char *keyStr) {
+    property_get_fn property_get = resolve_libcutils_property_get();
+    if (property_get == nullptr) {
+        return env->NewStringUTF("");
+    }
+    char result[PROPERTY_VALUE_MAX];
+    result[0] = '\0';
+    int len = property_get(keyStr, result, "");
     if (len <= 0) {
         return env->NewStringUTF("");
     }
     return env->NewStringUTF(result);
 }
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getSystemPropertyByGet(JNIEnv *env, jclass clazz, jstring key) {
+    (void) clazz;
+    const char *keyStr = env->GetStringUTFChars(key, nullptr);
+    if (keyStr == nullptr) {
+        return env->NewStringUTF("Error: Unable to retrieve key string");
+    }
+    jstring value = read_property_get(env, keyStr);
+    env->ReleaseStringUTFChars(key, keyStr);
+    return value;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getSystemPropertyByFind(JNIEnv *env, jclass clazz, jstring key) {
+    (void) clazz;
+    const char *keyStr = env->GetStringUTFChars(key, nullptr);
+    if (keyStr == nullptr) {
+        return env->NewStringUTF("Error: Unable to retrieve key string");
+    }
+    jstring value = read_property_find(env, keyStr);
+    env->ReleaseStringUTFChars(key, keyStr);
+    return value;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getLibcutilsPropertyGet(JNIEnv *env, jclass clazz, jstring key) {
+    (void) clazz;
+    const char *keyStr = env->GetStringUTFChars(key, nullptr);
+    if (keyStr == nullptr) {
+        return env->NewStringUTF("");
+    }
+    jstring value = read_libcutils_property_get(env, keyStr);
+    env->ReleaseStringUTFChars(key, keyStr);
+    return value;
+}
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_android_device_Jni_JniInterface_getASensorList(JNIEnv *env, jclass clazz) {
-/*    ASensorManager *sensorManager = ASensorManager_getInstance();
-    if (sensorManager) {
-        LOGD("sensorManager not null");
-
-        // 首先获取传感器数量
-        int count = ASensorManager_getSensorList(sensorManager, nullptr);
-        LOGD("sensorList count %d", count);
-        if (count > 0) {
-            // 分配ASensorRef数组
-//            ASensorRef *sensorRefs = new ASensorRef[count];
-
-            // 获取传感器列表
-            const ASensor *const *sensorList;
-            count = ASensorManager_getSensorList(sensorManager, &sensorList);
-//            if (sensorList) {
-//                LOGD("Sensorlist not null %d", count);
-//            } else {
-//                LOGD("Sensorlist null");
-//            }
-            // 将ASensorList转换为ASensorRef数组
-//            for (int i = 0; i < count; i++) {
-////                sensorRefs[i] = const_cast<ASensor *>(sensorList[i]);
-//                sensorRefs[i] = sensorList[i];
-//            }
-            // 现在你可以使用sensorRefs数组
-            for (int i = 0; i < count; i++) {
-                if (sensorList[i]) {
-                    LOGD("Sensor not null %d", i);
-                    LOGD("Sensor name %d: %s", i, ASensor_getName(sensorList[i]));
-                    LOGD("Sensor vendor %d: %s", i, ASensor_getVendor(sensorList[i]));
-                } else {
-                    LOGD("Sensor null %d", i);
-                }
-            }
-            // 清理内存
-//            delete[] sensorRefs;
-        }
-    } else {
-        LOGD("sensorManager null");
-    }*/
+    (void) clazz;
     FILE *fileptr = fopen("/tmp/boottime", "r");
     if (!fileptr) {
         LOGD("Error opening file: %s\n", strerror(errno));
@@ -124,8 +129,7 @@ Java_com_android_device_Jni_JniInterface_getASensorList(JNIEnv *env, jclass claz
         LOGD("file error");
     }
 
-    jstring java_str = env->NewStringUTF("jni");
-    return java_str;
+    return env->NewStringUTF("jni");
 }
 
 extern "C"
@@ -133,4 +137,15 @@ JNIEXPORT jstring JNICALL
 Java_com_android_device_Jni_JniInterface_getProvenanceFingerprint(JNIEnv *env, jclass clazz) {
     (void) clazz;
     return env->NewStringUTF(kProvenanceWatermark);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getNativePropertyDiagnostics(JNIEnv *env, jclass clazz) {
+    (void) clazz;
+    property_get_fn property_get = resolve_libcutils_property_get();
+    const char *diag = property_get != nullptr
+            ? "{\"jniGet\":\"__system_property_get\",\"jniFind\":\"__system_property_find+__system_property_read\",\"libcutils\":\"libcutils.property_get\"}"
+            : "{\"jniGet\":\"__system_property_get\",\"jniFind\":\"__system_property_find+__system_property_read\",\"libcutils\":\"unavailable\"}";
+    return env->NewStringUTF(diag);
 }

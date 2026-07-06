@@ -13,12 +13,29 @@ public final class JniPropertyHelper {
     private JniPropertyHelper() {
     }
 
+    public static String getSystemPropertyByGet(String key) {
+        return readProperty(key, JniInterface::getSystemPropertyByGet);
+    }
+
     public static String getSystemPropertyByFind(String key) {
         return readProperty(key, JniInterface::getSystemPropertyByFind);
     }
 
     public static String getLibcutilsPropertyGet(String key) {
         return readProperty(key, JniInterface::getLibcutilsPropertyGet);
+    }
+
+    public static String getNativePropertyDiagnostics() {
+        if (!jniUsable) {
+            return "{}";
+        }
+        try {
+            String value = JniInterface.getNativePropertyDiagnostics();
+            return value != null ? value.trim() : "{}";
+        } catch (Throwable t) {
+            Log.w(TAG, "Native diagnostics read failed", t);
+            return "{}";
+        }
     }
 
     private static String readProperty(String key, PropertyReader reader) {

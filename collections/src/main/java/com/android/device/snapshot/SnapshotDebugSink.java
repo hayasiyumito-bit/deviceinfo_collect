@@ -111,7 +111,9 @@ final class SnapshotDebugSink {
         }
     }
 
-    /** 清理此前时间戳命名遗留文件，避免 Download 目录混乱。 */
+    /**
+     * 清理此前时间戳命名遗留文件，避免 Download 目录混乱。
+     */
     private static void cleanupLegacyTimestampedFiles(ContentResolver resolver) {
         Uri collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
         try (Cursor cursor = resolver.query(

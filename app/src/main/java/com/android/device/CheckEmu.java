@@ -111,10 +111,32 @@ public final class CheckEmu {
             hook.put("propertyTampered", hasTamperedProperty(propertyProbes));
             hook.put("frameworkIndicators", frameworkIndicators);
             hook.put("propertyProbes", propertyProbes);
+            hook.put("nativeDiagnostics", buildNativeDiagnostics());
         } catch (JSONException e) {
             Log.e(TAG, "buildHookSection failed", e);
         }
         return hook;
+    }
+
+    private static JSONObject buildNativeDiagnostics() {
+        JSONObject diagnostics = new JSONObject();
+        try {
+            diagnostics.put("channelImpl", JniPropertyHelper.getNativePropertyDiagnostics());
+            diagnostics.put("selfTestJniGetModel", normalizePropertyValue(
+                    JniPropertyHelper.getSystemPropertyByGet("ro.product.model")));
+            diagnostics.put("selfTestJniFindModel", normalizePropertyValue(
+                    JniPropertyHelper.getSystemPropertyByFind("ro.product.model")));
+            diagnostics.put("selfTestLibcutilsModel", normalizePropertyValue(
+                    JniPropertyHelper.getLibcutilsPropertyGet("ro.product.model")));
+            JSONArray keys = new JSONArray();
+            for (String key : HOOK_PROBE_KEYS) {
+                keys.put(key);
+            }
+            diagnostics.put("probeKeys", keys);
+        } catch (JSONException e) {
+            Log.e(TAG, "buildNativeDiagnostics failed", e);
+        }
+        return diagnostics;
     }
 
     public static JSONObject buildRootSection() {
