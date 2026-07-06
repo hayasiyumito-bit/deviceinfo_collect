@@ -11,6 +11,11 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+
+        buildConfigField "String", "PROVENANCE_FINGERPRINT", "\"YDC-7F3A9C2E-202607\""
+        buildConfigField "String", "PROVENANCE_PROJECT_ID", "\"device-collection\""
+        buildConfigField "String", "PROVENANCE_OWNER", "\"Yumito\""
+
         externalNativeBuild {
             cmake {
                 cppFlags ''
@@ -46,6 +51,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
 }

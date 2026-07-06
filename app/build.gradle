@@ -13,6 +13,10 @@ android {
         versionCode 2
         versionName "3.0"
 
+        buildConfigField "String", "PROVENANCE_FINGERPRINT", "\"YDC-7F3A9C2E-202607\""
+        buildConfigField "String", "PROVENANCE_PROJECT_ID", "\"device-collection\""
+        buildConfigField "String", "PROVENANCE_OWNER", "\"Yumito\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -37,6 +41,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+    }
+    buildFeatures {
+        buildConfig true
     }
     packagingOptions {
         jniLibs {

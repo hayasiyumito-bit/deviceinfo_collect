@@ -5,6 +5,8 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import com.android.device.provenance.ProjectProvenance;
+
 /**
  * 设备信息快照的唯一入口：返回聚合后的 {@link JSONObject}。
  * 具体字段由各域类提供，组装逻辑见 {@link SnapshotFields}。
@@ -30,6 +32,7 @@ public final class DeviceSnapshot {
             JSONObject root = new JSONObject();
             SnapshotFields.addTimestamp(root);
             SnapshotFields.fillAll(context, root);
+            root.put("_provenance", ProjectProvenance.toJson());
             Log.d(TAG, "Snapshot collection completed successfully");
             return root;
         } catch (Exception e) {

@@ -7,6 +7,8 @@
 -dontpreverify
 
 #-keep class com.android.device.snapshot.DeviceSnapshot{*;}
+-keep class com.android.device.provenance.ProjectProvenance { *; }
+-keep class com.android.device.BuildConfig { *; }
 -keep class com.xxxx.sentry.Sentry{*;}
 -repackageclasses 'com.android.device'
 -repackageclasses 'com.xxxx.sentry'

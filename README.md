@@ -39,33 +39,59 @@ cd device-collection
 安装后启动 App，会自动采集；点击右下角 FAB 可重新采集。  
 导出文件：`/sdcard/Download/debug_output.json`（Android 10+ 通过 MediaStore 写入）。
 
+## 许可证与商业权利
+
+| 主体 | 权利 |
+|------|------|
+| **公众 / 第三方** | [CC BY-NC 4.0](LICENSE) — 仅非商业使用，须署名 |
+| **著作权人 Yumito** | **保留完整商业使用权**，不受 NC 限制 |
+
+详见 [COMMERCIAL.md](COMMERCIAL.md)。
+
+第三方禁止未经授权商用；Yumito 本人未来可基于本项目商业化。
+
+## 溯源追踪（Provenance）
+
+指纹：**`YDC-7F3A9C2E-202607`**
+
+| 位置 | 说明 |
+|------|------|
+| `NOTICE` | 法律与指纹声明 |
+| `ProjectProvenance.java` | 源码常量 |
+| APK `meta-data` | `com.android.device.provenance.*` |
+| `BuildConfig` | `PROVENANCE_FINGERPRINT` |
+| `libdevice.so` | Native 字符串水印 |
+| `debug_output.json` | 顶层 `_provenance` |
+
+```bash
+jq '._provenance' debug_output.json
+strings lib/arm64-v8a/libdevice.so | grep YDC-7F3A9C2E
+```
+
 ## debug_output.json 结构（节选）
 
 ```json
 {
+  "_provenance": {
+    "fingerprint": "YDC-7F3A9C2E-202607",
+    "projectId": "device-collection",
+    "copyrightHolder": "Yumito",
+    "licensePublic": "CC-BY-NC-4.0",
+    "commercialRights": "Yumito exclusive — commercial use reserved"
+  },
   "collectedAt": 1751772000000,
   "anyRisk": true,
-  "anyRiskReasons": ["..."],
-  "security": {
-    "summary": { "hookFrameworkDetected": true, "anyRisk": true },
-    "reasons": { "hook": ["..."], "root": ["..."] },
-    "hook": { "propertyProbes": { ... } },
-    "root": { ... }
-  },
-  "build": { ... },
-  "ids": { ... }
+  "security": { ... }
 }
 ```
 
-## 许可证
+## 许可证（摘要）
 
-本项目采用 **[CC BY-NC 4.0（署名-非商业性使用）](LICENSE)**。
+- 允许：学习、研究、个人与非商业场景下的使用与修改（须署名）
+- 禁止：第三方未经授权的商业使用
+- 著作权人 Yumito 保留商业使用权
 
-- 允许：学习、研究、个人与非商业场景下的使用与修改
-- 禁止：未经作者书面许可的商业使用
-- 要求：保留署名并说明修改
-
-如需商业授权，请通过 Gitee Issue 或仓库维护者联系。
+完整条款见 [LICENSE](LICENSE)、[NOTICE](NOTICE)。
 
 ## 免责声明
 

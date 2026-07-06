@@ -9,6 +9,10 @@
 #define LOG_TAG "SensorHelper"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
+// Provenance watermark — YDC-7F3A9C2E-202607 device-collection Yumito (do not remove)
+static const char kProvenanceWatermark[] =
+        "YDC-7F3A9C2E-202607|device-collection|Yumito|CC-BY-NC-4.0";
+
 #define PROPERTY_VALUE_MAX 92
 extern "C"
 JNIEXPORT jstring JNICALL
@@ -122,4 +126,11 @@ Java_com_android_device_Jni_JniInterface_getASensorList(JNIEnv *env, jclass claz
 
     jstring java_str = env->NewStringUTF("jni");
     return java_str;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getProvenanceFingerprint(JNIEnv *env, jclass clazz) {
+    (void) clazz;
+    return env->NewStringUTF(kProvenanceWatermark);
 }

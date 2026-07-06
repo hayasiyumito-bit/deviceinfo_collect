@@ -21,6 +21,22 @@
         android:theme="@style/Theme.Adr_device_info"
         android:usesCleartextTraffic="true">
 
+        <meta-data
+            android:name="com.android.device.provenance.fingerprint"
+            android:value="YDC-7F3A9C2E-202607" />
+        <meta-data
+            android:name="com.android.device.provenance.projectId"
+            android:value="device-collection" />
+        <meta-data
+            android:name="com.android.device.provenance.owner"
+            android:value="Yumito" />
+        <meta-data
+            android:name="com.android.device.provenance.license"
+            android:value="CC-BY-NC-4.0" />
+        <meta-data
+            android:name="com.android.device.provenance.commercialRights"
+            android:value="Yumito exclusive" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

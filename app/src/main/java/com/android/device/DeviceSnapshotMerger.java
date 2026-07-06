@@ -3,6 +3,7 @@ package com.android.device;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.device.provenance.ProjectProvenance;
 import com.android.device.snapshot.DeviceSnapshot;
 
 import org.json.JSONObject;
@@ -30,6 +31,12 @@ public final class DeviceSnapshotMerger {
 
         try {
             root.put("collectedAt", System.currentTimeMillis());
+            JSONObject provenance = ProjectProvenance.toJson();
+            provenance.put("artifactVersion", BuildConfig.VERSION_NAME);
+            provenance.put("buildPackage", BuildConfig.APPLICATION_ID);
+            provenance.put("buildType", BuildConfig.BUILD_TYPE);
+            provenance.put("provenanceFingerprint", BuildConfig.PROVENANCE_FINGERPRINT);
+            root.put("_provenance", provenance);
         } catch (Exception e) {
             Log.w(TAG, "Failed to write collection metadata", e);
         }

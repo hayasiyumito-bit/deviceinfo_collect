@@ -1,20 +1,50 @@
 Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)
 
-Copyright (c) 2026 Yumito
+Copyright (c) 2026 Yumito. All rights reserved.
 
-本作品采用知识共享署名-非商业性使用 4.0 国际许可协议进行许可。
-You are free to share and adapt the material for non-commercial purposes only.
+================================================================================
+一、第三方 / 公众使用（Non-Commercial License）
+================================================================================
 
-完整法律文本：https://creativecommons.org/licenses/by-nc/4.0/legalcode
+本仓库源码对**公众**采用 CC BY-NC 4.0 许可：
+https://creativecommons.org/licenses/by-nc/4.0/legalcode
 
-摘要（非法律文本）：
-- 署名：您必须给出适当的署名，提供指向本许可协议的链接，并说明是否做了修改。
-- 非商业性使用：您不得将本作品用于商业目的。
-- 无附加限制：您不得附加法律条款或技术措施，从而限制他人行使本许可所允许的权利。
+- 允许：署名前提下，用于学习、研究、个人与非商业场景的使用与修改
+- 禁止：任何未经授权的**商业使用**（包括但不限于收费产品、SaaS、
+  企业内部商用部署、二次售卖、广告变现等）
+- 要求：保留署名、许可说明及本仓库溯源标识（见 NOTICE / _provenance）
 
-如需商业授权，请联系仓库维护者。
+完整法律文本以 Creative Commons 官网为准。
 
-English Summary:
-This work is licensed under CC BY-NC 4.0. You may use, modify, and
-distribute it only for non-commercial purposes, with attribution.
-Commercial use requires separate permission from the copyright holder.
+================================================================================
+二、著作权人（Yumito）保留权利（Commercial Rights Reserved）
+================================================================================
+
+**著作权人 Yumito 保留对本项目的完整商业使用权**，包括但不限于：
+
+- 将本项目用于自有或授权的商业产品、服务与解决方案
+- 基于本项目开发闭源或商业版本
+- 对外授权、转让、许可商业使用（Exclusive commercial licensing）
+
+上述权利**不受 CC BY-NC 4.0 对公众之限制**，仅适用于著作权人 Yumito
+及其书面授权的主体。
+
+第三方如需商业使用，须事先获得 Yumito 书面授权。
+
+================================================================================
+三、溯源与追踪（Provenance）
+================================================================================
+
+本项目在源码、构建产物及导出 JSON 中嵌入统一溯源标识（Fingerprint），
+用于识别未经授权的商用分发。标识详见 NOTICE 及 `_provenance` 字段。
+
+移除、篡改或伪造溯源标识，可能构成对著作权及许可条款的违反。
+
+================================================================================
+English Summary
+================================================================================
+
+Public use: CC BY-NC 4.0 — non-commercial only, with attribution.
+Copyright holder Yumito: retains exclusive rights to commercial use.
+Unauthorized commercial use by third parties is prohibited.
+Commercial licensing: contact the repository maintainer (Yumito).

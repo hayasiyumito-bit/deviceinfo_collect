@@ -1,4 +1,10 @@
-# Add project specific ProGuard rules here.
+# Provenance / traceability — keep for commercial compliance tracking
+-keep class com.android.device.provenance.ProjectProvenance { *; }
+-keep class com.android.device.BuildConfig { *; }
+-keepclassmembers class com.android.device.Jni.JniInterface {
+    public static native java.lang.String getProvenanceFingerprint();
+}
+
 # You can control the set of applied configuration files using the
 # proguardFiles setting in build.gradle.
 #
