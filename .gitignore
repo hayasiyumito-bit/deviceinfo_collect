@@ -1,0 +1,66 @@
+# Gradle / Android build
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Native / CMake
+.cxx/
+**/.cxx/
+.externalNativeBuild/
+**/.externalNativeBuild/
+
+# IDE
+*.iml
+.idea/
+local.properties
+.DS_Store
+
+# Outputs
+/captures/
+**/outputs/
+*.apk
+*.aab
+*.ap_
+*.hprof
+*.log
+
+# Kotlin
+.kotlin/
+
+# Local signing (do not commit)
+*.keystore
+*.jks
+
+# Large models / assets
+**/*.gguf
+app/src/main/assets/
+
+# AI / analysis tooling (local only)
+deepwiki-open/
+code_vector_memory/
+global_code_vector_db/
+code_chunks_cache.json
+project_analyzer.py
+android_code_graph.json
+android_business_flow.mmd
+android_module_business/
+PROJECT_FULL_ANALYSIS.md
+PROJECT_STRUCTURE.md
+
+# Compiled Java
+**/bin/
+*.class
+**/*.jar.cache/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Env / secrets
+.env
+.env.*
+
+# OS
+Thumbs.db

@@ -1,0 +1,86 @@
+plugins {
+    id 'java'
+//    id 'maven-publish'
+//    id 'com.vanniktech.maven.publish'
+}
+
+//android {
+//    namespace 'com.aliyun.upload'
+//    compileSdk 32
+//
+//    defaultConfig {
+//        minSdk 28
+//        targetSdk 32
+//
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//        consumerProguardFiles "consumer-rules.pro"
+//    }
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
+//    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//}
+
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            myPublication(MavenPublication){
+//                //release 或者debug
+//                from(components.getByName("debug"))
+//                groupId = "com.aliyun.upload"
+//                artifactId = "beta"
+//                version = "1.0.0"
+//                repositories {
+//                    maven {
+//                        //repository的名字，随便取
+//                        name = "myRepo"
+//                        //阿里云效的地址，仓库地址
+//                        url = uri("https://repo.rdc.aliyun.com/repository/139753-snapshot-YEF74z/")
+//                        credentials {
+//                            //阿里云效的用户名
+//                            username = "FM5pRT"
+//                            //阿里云效的密码
+//                            password = "LsmGC0sEd7"
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
+
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: 'https://repo.rdc.aliyun.com/repository/139753-release-GkUj3e/') {
+//                authentication(
+//                        userName: 'FM5pRT',
+//                        password: 'LsmGC0sEd7'
+//                )
+//            }
+//            snapshotRepository(url: 'https://repo.rdc.aliyun.com/repository/139753-snapshot-YEF74z/') {
+//                authentication(
+//                        userName: 'FM5pRT',
+//                        password: 'LsmGC0sEd7'
+//                )
+//            }
+//            pom.version = '1.0.1'
+//            pom.artifactId = 'beta'
+//            pom.groupId = 'com.aliyun.upload'
+//        }
+//    }
+//}
+
+dependencies {
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}

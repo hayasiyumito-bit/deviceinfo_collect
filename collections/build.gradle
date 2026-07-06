@@ -1,0 +1,59 @@
+plugins {
+    id 'com.android.library'
+}
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        //applicationId "com.android.device"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+            }
+        }
+    }
+
+    buildTypes {
+
+        debug {
+            zipAlignEnabled true
+            minifyEnabled false
+            proguardFiles 'proguard-rules.pro'
+            versionNameSuffix '-dev'
+            debuggable true
+        }
+
+        release {
+            zipAlignEnabled true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            debuggable false
+
+            /**aar重命名*/
+            android.libraryVariants.all { variant ->
+                variant.outputs.all {
+                    outputFileName = "libapp_info.aar"
+                }
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+}
+
+dependencies {
+    //implementation 'androidx.core:core:1.9.0'
+    //implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation("com.android.installreferrer:installreferrer:2.2")
+    api 'io.github.maven-rep:json:1.0.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}

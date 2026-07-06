@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">设备信息采集</string>
+    <string name="title_device_info_default">设备参数</string>
+    <string name="title_device_info">设备参数 (%1$d)</string>
+    <string name="status_ready">准备就绪</string>
+    <string name="status_collecting">正在采集设备参数…</string>
+    <string name="status_done">采集完成，共 %1$d 条</string>
+    <string name="status_filtered">当前显示 %1$d 条</string>
+    <string name="status_parse_error">解析失败：%1$s</string>
+    <string name="status_parse_error_toast">数据解析失败</string>
+    <string name="status_collect_error">采集失败：%1$s</string>
+    <string name="action_ok">确定</string>
+    <string name="action_refresh">刷新</string>
+    <string name="about_title">关于</string>
+    <string name="about_message">设备信息采集\n\n启动后自动采集系统/硬件/网络/软件参数，并包含 Hook、模拟器、VPN、调试等安全检测项。\n\n点击条目查看完整内容。</string>
+    <string name="chip_all">全部</string>
+    <string name="chip_security">安全</string>
+    <string name="chip_system">系统</string>
+    <string name="chip_hardware">硬件</string>
+    <string name="chip_network">网络</string>
+    <string name="chip_software">软件</string>
+    <string name="chip_storage">存储</string>
+    <string name="chip_sensor">传感器</string>
+    <string name="chip_other">其他</string>
+</resources>
