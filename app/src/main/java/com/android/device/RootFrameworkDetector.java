@@ -677,7 +677,8 @@ public final class RootFrameworkDetector {
         for (String key : BOOT_UNLOCK_PROPS) {
             String shell = normalize(Cmd.getPropertyViaShell(key));
             String jni = normalize(JniPropertyHelper.getSystemPropertyByFind(key));
-            if (!shell.isEmpty() && !jni.isEmpty() && !shell.equals(jni)) {
+            if (!shell.isEmpty() && !jni.isEmpty() && !JniPropertyHelper.isErrorResult(jni)
+                    && !shell.equals(jni)) {
                 hits.put(key + " 通道不一致: getprop=" + shell + " jni=" + jni);
             }
         }

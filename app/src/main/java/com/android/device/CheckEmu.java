@@ -386,22 +386,43 @@ public final class CheckEmu {
         try {
             String getprop = readViaGetprop(key);
             String systemProperty = normalizePropertyValue(Cmd.getPropertyViaJavaApi(key));
+            String jniGet = normalizePropertyValue(JniPropertyHelper.getSystemPropertyByGet(key));
             String jniFind = normalizePropertyValue(JniPropertyHelper.getSystemPropertyByFind(key));
             String libcutils = normalizePropertyValue(JniPropertyHelper.getLibcutilsPropertyGet(key));
 
-            boolean tampered = isPropertyTampered(getprop, systemProperty, jniFind, libcutils);
+            boolean tampered = isPropertyTampered(getprop, systemProperty, jniGet, jniFind, libcutils);
             probe.put("getprop", getprop);
             probe.put("SystemProperties", systemProperty);
+            probe.put("jniGet", jniGet);
             probe.put("jniFind", jniFind);
             probe.put("libcutils", libcutils);
             probe.put("tampered", tampered);
             if (tampered) {
-                probe.put("tamperReason", buildTamperReason(key, getprop, systemProperty, jniFind, libcutils));
+                probe.put("tamperReason", buildTamperReason(
+                        key, getprop, systemProperty, jniGet, jniFind, libcutils));
+            }
+            JSONArray channelErrors = collectChannelErrors(jniGet, jniFind, libcutils);
+            if (channelErrors.length() > 0) {
+                probe.put("channelErrors", channelErrors);
             }
         } catch (JSONException e) {
             Log.e(TAG, "probeProperty failed for " + key, e);
+            try {
+                probe.put("error", "Error: " + e.getMessage());
+            } catch (JSONException ignored) {
+            }
         }
         return probe;
+    }
+
+    private static JSONArray collectChannelErrors(String... channelValues) throws JSONException {
+        JSONArray errors = new JSONArray();
+        for (String value : channelValues) {
+            if (JniPropertyHelper.isErrorResult(value)) {
+                errors.put(value);
+            }
+        }
+        return errors;
     }
 
     private static JSONObject buildPropertyProbes() throws JSONException {
@@ -453,11 +474,13 @@ public final class CheckEmu {
             String key,
             String getprop,
             String systemProperty,
+            String jniGet,
             String jniFind,
             String libcutils
     ) {
         return key + " 多通道不一致: getprop=" + getprop
                 + ", SystemProperties=" + systemProperty
+                + ", jniGet=" + jniGet
                 + ", jniFind=" + jniFind
                 + ", libcutils=" + libcutils;
     }
@@ -486,7 +509,11 @@ public final class CheckEmu {
     private static boolean isPropertyTampered(String... values) {
         Set<String> distinct = new LinkedHashSet<>();
         for (String value : values) {
-            distinct.add(normalizePropertyValue(value));
+            String normalized = normalizePropertyValue(value);
+            if (normalized.isEmpty() || JniPropertyHelper.isErrorResult(normalized)) {
+                continue;
+            }
+            distinct.add(normalized);
         }
         return distinct.size() > 1;
     }

@@ -738,8 +738,12 @@ public final class DeviceInfoParser {
                 return "getprop 通道";
             case "SystemProperties":
                 return "SystemProperties 通道";
+            case "jniGet":
+                return "JNI __system_property_get";
             case "jniFind":
                 return "JNI __system_property_find";
+            case "channelErrors":
+                return "JNI 通道错误";
             case "libcutils":
                 return "JNI property_get";
             case "tampered":

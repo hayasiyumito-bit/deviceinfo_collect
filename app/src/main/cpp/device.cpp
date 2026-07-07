@@ -60,13 +60,13 @@ static property_get_fn resolve_libcutils_property_get() {
 static jstring read_libcutils_property_get(JNIEnv *env, const char *keyStr) {
     property_get_fn property_get = resolve_libcutils_property_get();
     if (property_get == nullptr) {
-        return env->NewStringUTF("");
+        return env->NewStringUTF("Error: libcutils property_get unavailable");
     }
     char result[PROPERTY_VALUE_MAX];
     result[0] = '\0';
     int len = property_get(keyStr, result, "");
     if (len <= 0) {
-        return env->NewStringUTF("");
+        return env->NewStringUTF("Error: Property not found or unable to retrieve");
     }
     return env->NewStringUTF(result);
 }
@@ -103,7 +103,7 @@ Java_com_android_device_Jni_JniInterface_getLibcutilsPropertyGet(JNIEnv *env, jc
     (void) clazz;
     const char *keyStr = env->GetStringUTFChars(key, nullptr);
     if (keyStr == nullptr) {
-        return env->NewStringUTF("");
+        return env->NewStringUTF("Error: Unable to retrieve key string");
     }
     jstring value = read_libcutils_property_get(env, keyStr);
     env->ReleaseStringUTFChars(key, keyStr);
