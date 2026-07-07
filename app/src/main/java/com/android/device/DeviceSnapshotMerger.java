@@ -48,6 +48,8 @@ public final class DeviceSnapshotMerger {
             root.put("security", security);
             root.put("anyRisk", security.optBoolean("anyRisk", false));
             root.put("anyRiskReasons", security.optJSONArray("anyRiskReasons"));
+            root.put("anyRiskFixHints", security.optJSONArray("anyRiskFixHints"));
+            root.put("remediation", security.optJSONObject("remediation"));
         } catch (Exception e) {
             Log.w(TAG, "security report skipped", e);
         }

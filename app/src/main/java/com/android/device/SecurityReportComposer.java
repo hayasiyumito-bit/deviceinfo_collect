@@ -58,6 +58,9 @@ public final class SecurityReportComposer {
             boolean anyRisk = summary.optBoolean("anyRisk", false);
             security.put("anyRisk", anyRisk);
             security.put("anyRiskReasons", buildAnyRiskReasons(summary, reasons));
+            JSONObject remediation = SecurityRemediationBuilder.build(summary, hookSection, rootSection);
+            security.put("remediation", remediation);
+            security.put("anyRiskFixHints", SecurityRemediationBuilder.buildFixHints(remediation));
             security.put("hook", hookSection);
             security.put("root", rootSection);
             security.put("environment", environment);

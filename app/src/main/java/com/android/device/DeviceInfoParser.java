@@ -139,6 +139,44 @@ public final class DeviceInfoParser {
                 items.add(anyRiskReasonsItem);
             }
         }
+        DeviceInfoItem fixHintsItem = findItem(categoryItems, "anyRiskFixHints");
+        if (fixHintsItem != null) {
+            try {
+                JSONArray hints = new JSONArray(fixHintsItem.getFullValue());
+                if (hints.length() > 0) {
+                    items.add(new DeviceInfoItem(
+                            "anyRiskFixHints",
+                            "修复指引(简)",
+                            formatReasonArray(hints),
+                            "安全检测",
+                            fixHintsItem.getFullValue()
+                    ));
+                }
+            } catch (JSONException ignored) {
+                items.add(fixHintsItem);
+            }
+        }
+        DeviceInfoItem remediationItem = findItem(categoryItems, "remediation");
+        if (remediationItem != null) {
+            String remediationSummary = remediationItem.getFullValue();
+            try {
+                JSONObject remediationJson = new JSONObject(remediationItem.getFullValue());
+                remediationSummary = remediationJson.optString("summary", remediationSummary);
+            } catch (JSONException ignored) {
+            }
+            items.add(new DeviceInfoItem(
+                    "remediation",
+                    "修复指引(详)",
+                    remediationSummary,
+                    "安全检测",
+                    remediationItem.getFullValue()
+            ));
+            items.addAll(createExpandedFieldItems(
+                    "remediation",
+                    remediationItem.getFullValue(),
+                    "安全检测"
+            ));
+        }
 
         DeviceInfoItem securityItem = findItem(categoryItems, "security");
         if (securityItem != null) {
@@ -169,6 +207,8 @@ public final class DeviceInfoParser {
             String key = item.getOriginalKey();
             if ("anyRisk".equals(key)
                     || "anyRiskReasons".equals(key)
+                    || "anyRiskFixHints".equals(key)
+                    || "remediation".equals(key)
                     || "security".equals(key)
                     || "rootAccessGranted".equals(key)
                     || "rootAccessDetail".equals(key)
@@ -562,6 +602,28 @@ public final class DeviceInfoParser {
                 return "存在安全风险";
             case "anyRiskReasons":
                 return "安全风险原因";
+            case "anyRiskFixHints":
+                return "修复指引(简)";
+            case "remediation":
+                return "修复指引(详)";
+            case "remediation.summary":
+                return "修复摘要";
+            case "remediation.items":
+                return "修复项列表";
+            case "remediation.regressionChecklist":
+                return "回归检查清单";
+            case "remediation.yumyhookReferences":
+                return "YumyHook 参考路径";
+            case "fixTarget":
+                return "修复目标";
+            case "fixAction":
+                return "修复动作";
+            case "verify":
+                return "回归验证";
+            case "detectorSource":
+                return "检测来源";
+            case "severity":
+                return "严重级别";
             case "security":
                 return "安全检测(完整JSON)";
             case "security.summary":

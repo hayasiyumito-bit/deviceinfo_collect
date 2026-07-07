@@ -1533,9 +1533,96 @@
     },
     "anyRisk": true,
     "anyRiskReasons": [
-      "疑似 Root 隐藏：maps\/mount\/Native 有信号但各框架路径不可见",
-      "疑似 Root 隐藏：检测信号存在但 su\/路径被隐藏"
+      "Native 探测命中 Magisk\/Zygisk",
+      "Native 路径可访问: \/debug_ramdisk\/magisk"
     ],
+    "anyRiskFixHints": [
+      "Native access() 可访问: \/debug_ramdisk\/magisk | 修复: Hook access\/faccessat\/__syscall(faccessat)，对路径 \/debug_ramdisk\/magisk 返回 -1 (ENOENT) @ YumyHook\/native_bridge.cpp",
+      "Native 读 \/proc\/self\/maps 命中: zygisk | 修复: Hook fopen\/open + fgets\/read，过滤 maps 行中含 \"zygisk\" 的内容 @ YumyHook\/native_bridge.cpp",
+      "Native 读 \/proc\/self\/mountinfo 命中: magisk | 修复: Hook fopen(\"\/proc\/self\/mountinfo\") + fgets，过滤含 \"magisk\" 的行 @ YumyHook\/native_bridge.cpp",
+      "Java\/Native 路径不一致: \/debug_ramdisk\/magisk (native可访问, Java=false) | 修复: Java 不可见的路径，Native access() 也必须失败（与 File.exists 对齐） @ YumyHook\/native_bridge.cpp access\/faccessat",
+      "Magisk\/Zygisk 已确认 (Native 探测命中 Magisk\/Zygisk) | 修复: 见 nativeProbe 相关项；过滤 magisk\/zygisk 路径与 proc 行 @ YumyHook native_bridge.cpp + SensitivePathStealthHook.kt"
+    ],
+    "remediation": {
+      "anyRisk": true,
+      "verdict": "RISK_DETECTED",
+      "summary": "Native JNI 层未对齐（access\/proc 读仍泄漏 Root 信号），优先修复 YumyHook\/native_bridge.cpp",
+      "items": [
+        {
+          "id": "native_access__debug_ramdisk_magisk",
+          "severity": "critical",
+          "category": "root_native",
+          "framework": "magisk",
+          "detection": "Native access() 可访问: \/debug_ramdisk\/magisk",
+          "fixTarget": "YumyHook\/native_bridge.cpp",
+          "fixAction": "Hook access\/faccessat\/__syscall(faccessat)，对路径 \/debug_ramdisk\/magisk 返回 -1 (ENOENT)",
+          "verify": "nativeProbe.accessiblePaths 不含 \/debug_ramdisk\/magisk",
+          "detectorSource": "device.cpp\/getMagiskNativeProbe + RootFrameworkDetector"
+        },
+        {
+          "id": "native_maps_zygisk",
+          "severity": "critical",
+          "category": "root_native",
+          "framework": "magisk",
+          "detection": "Native 读 \/proc\/self\/maps 命中: zygisk",
+          "fixTarget": "YumyHook\/native_bridge.cpp",
+          "fixAction": "Hook fopen\/open + fgets\/read，过滤 maps 行中含 \"zygisk\" 的内容",
+          "verify": "nativeProbe.mapsHits 不含 zygisk",
+          "detectorSource": "device.cpp\/getMagiskNativeProbe + RootFrameworkDetector"
+        },
+        {
+          "id": "native_mount_magisk",
+          "severity": "critical",
+          "category": "root_native",
+          "framework": "magisk",
+          "detection": "Native 读 \/proc\/self\/mountinfo 命中: magisk",
+          "fixTarget": "YumyHook\/native_bridge.cpp",
+          "fixAction": "Hook fopen(\"\/proc\/self\/mountinfo\") + fgets，过滤含 \"magisk\" 的行",
+          "verify": "nativeProbe.mountHits 不含 magisk",
+          "detectorSource": "device.cpp\/getMagiskNativeProbe + RootFrameworkDetector"
+        },
+        {
+          "id": "root_java_native_mismatch",
+          "severity": "high",
+          "category": "root_native",
+          "detection": "Java\/Native 路径不一致: \/debug_ramdisk\/magisk (native可访问, Java=false)",
+          "fixTarget": "YumyHook\/native_bridge.cpp access\/faccessat",
+          "fixAction": "Java 不可见的路径，Native access() 也必须失败（与 File.exists 对齐）",
+          "verify": "sharedIndicators.javaNativeMismatches=[]",
+          "detectorSource": "device.cpp\/getMagiskNativeProbe + RootFrameworkDetector"
+        },
+        {
+          "id": "root_magisk_confirmed",
+          "severity": "high",
+          "category": "root_framework",
+          "framework": "magisk",
+          "detection": "Magisk\/Zygisk 已确认 (Native 探测命中 Magisk\/Zygisk)",
+          "fixTarget": "YumyHook native_bridge.cpp + SensitivePathStealthHook.kt",
+          "fixAction": "见 nativeProbe 相关项；过滤 magisk\/zygisk 路径与 proc 行",
+          "verify": "magiskDetected=false, frameworkConfirmed=false",
+          "detectorSource": "RootFrameworkDetector.probe"
+        }
+      ],
+      "regressionChecklist": [
+        "security.summary.anyRisk → false",
+        "security.summary.frameworkConfirmed → false（无经典 Root 指标时）",
+        "security.summary.magiskDetected \/ kernelsuDetected \/ apatchDetected \/ systemSuDetected → false",
+        "security.root.rootProbe.sharedIndicators.nativeProbe.anyHit → false",
+        "security.root.rootProbe.sharedIndicators.javaNativeMismatches → []",
+        "security.remediation.verdict → PASS"
+      ],
+      "yumyhookReferences": {
+        "nativeBridge": "YumyHook\/app\/src\/main\/cpp\/native_bridge.cpp",
+        "procMapsHook": "YumyHook\/...\/ProcMapsStealthHook.kt",
+        "pathHook": "YumyHook\/...\/SensitivePathStealthHook.kt",
+        "shellHook": "YumyHook\/...\/ShellProbeStealthHook.kt",
+        "propertyHook": "YumyHook 四通道 SystemProperties\/getprop\/JNI",
+        "logcatTag": "YH-NATIVE-STEALTH",
+        "regressionDoc": "deviceinfo_collect\/docs\/SECURITY_RISK_ANALYSIS.md",
+        "nativeProbeJni": "com.android.device.Jni.JniInterface.getMagiskNativeProbe",
+        "nativeProbeCpp": "deviceinfo_collect\/app\/src\/main\/cpp\/device.cpp"
+      }
+    },
     "hook": {
       "frameworkDetected": false,
       "propertyTampered": false,
@@ -2063,7 +2150,16 @@
   },
   "anyRisk": true,
   "anyRiskReasons": [
-    "疑似 Root 隐藏：maps\/mount\/Native 有信号但各框架路径不可见",
-    "疑似 Root 隐藏：检测信号存在但 su\/路径被隐藏"
-  ]
+    "Native 探测命中 Magisk\/Zygisk",
+    "Native 路径可访问: \/debug_ramdisk\/magisk"
+  ],
+  "anyRiskFixHints": [
+    "Native access() 可访问: \/debug_ramdisk\/magisk | 修复: Hook access\/faccessat\/__syscall(faccessat)，对路径 \/debug_ramdisk\/magisk 返回 -1 (ENOENT) @ YumyHook\/native_bridge.cpp",
+    "Native 读 \/proc\/self\/maps 命中: zygisk | 修复: Hook fopen\/open + fgets\/read，过滤 maps 行中含 \"zygisk\" 的内容 @ YumyHook\/native_bridge.cpp",
+    "Native 读 \/proc\/self\/mountinfo 命中: magisk | 修复: Hook fopen(\"\/proc\/self\/mountinfo\") + fgets，过滤含 \"magisk\" 的行 @ YumyHook\/native_bridge.cpp"
+  ],
+  "remediation": {
+    "verdict": "RISK_DETECTED",
+    "summary": "Native JNI 层未对齐，优先修复 YumyHook\/native_bridge.cpp；详见 security.remediation"
+  }
 }
