@@ -159,15 +159,17 @@ public final class CheckEmu {
             boolean kernelsuDetected = rootProbe.optBoolean("kernelsuDetected", false);
             boolean apatchDetected = rootProbe.optBoolean("apatchDetected", false);
             boolean systemSuDetected = rootProbe.optBoolean("systemSuDetected", false);
-            boolean frameworkDetected = rootProbe.optBoolean("detected", false);
-            boolean rooted = hasPositiveRootIndicator(indicators) || frameworkDetected;
+            boolean frameworkConfirmed = magiskDetected || kernelsuDetected || apatchDetected || systemSuDetected;
+            boolean hideSuspected = rootProbe.optBoolean("hideSuspected", false);
+            boolean rooted = hasPositiveRootIndicator(indicators) || frameworkConfirmed;
 
             root.put("isRooted", rooted);
+            root.put("frameworkConfirmed", frameworkConfirmed);
             root.put("magiskDetected", magiskDetected);
             root.put("kernelsuDetected", kernelsuDetected);
             root.put("apatchDetected", apatchDetected);
             root.put("systemSuDetected", systemSuDetected);
-            root.put("magiskHideSuspected", rootProbe.optBoolean("hideSuspected", false));
+            root.put("magiskHideSuspected", hideSuspected);
             root.put("accessGranted", RootAccessHelper.isRootGranted());
             root.put("accessDetail", RootAccessHelper.getAttemptDetail());
             root.put("indicators", indicators);
@@ -277,9 +279,6 @@ public final class CheckEmu {
                 for (int i = 0; i < probeReasons.length(); i++) {
                     reasons.put(probeReasons.optString(i));
                 }
-            }
-            if (rootSection.optBoolean("magiskHideSuspected", false)) {
-                reasons.put("疑似 Root 隐藏：检测信号存在但 su/路径被隐藏");
             }
         }
         return reasons;

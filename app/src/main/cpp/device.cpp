@@ -162,16 +162,27 @@ static const char *kNativeMagiskPaths[] = {
         "/data/adb/kernelsu",
         "/data/adb/ap",
         "/data/adb/apd",
-        "/system/bin/su",
-        "/system/xbin/su",
         "/debug_ramdisk/magisk",
         nullptr
 };
 
 static const char *kNativeMagiskKeywords[] = {
-        "magisk", "zygisk", "magiskpolicy", "kernelsu", "ksu", "ksud",
-        "apatch", "apd", "supersu", "daemonsu", nullptr
+        "magisk", "zygisk", "magiskpolicy", "kernelsu", "ksud",
+        "apatch", "/data/adb/ap", "/data/adb/apd", "supersu", "daemonsu", nullptr
 };
+
+static bool line_contains_keyword(const char *line, const char *keyword) {
+    if (line == nullptr || keyword == nullptr) {
+        return false;
+    }
+    if (keyword[0] == '/') {
+        return strstr(line, keyword) != nullptr;
+    }
+    if (strlen(keyword) < 5) {
+        return false;
+    }
+    return strstr(line, keyword) != nullptr;
+}
 
 static void append_json_string(char *buf, size_t cap, const char *value, bool *first) {
     if (value == nullptr || buf == nullptr || first == nullptr) {
@@ -195,7 +206,7 @@ static void append_keyword_hits(const char *path, const char **keywords, char *o
     bool first = true;
     while (fgets(line, sizeof(line), fp) != nullptr) {
         for (int i = 0; keywords[i] != nullptr; ++i) {
-            if (strstr(line, keywords[i]) != nullptr) {
+            if (line_contains_keyword(line, keywords[i])) {
                 append_json_string(out, cap, keywords[i], &first);
                 break;
             }

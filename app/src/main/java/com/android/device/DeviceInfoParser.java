@@ -638,6 +638,10 @@ public final class DeviceInfoParser {
                 return "检测到 APatch";
             case "systemSuDetected":
                 return "检测到系统 su";
+            case "frameworkConfirmed":
+                return "Root 框架已确认";
+            case "bootloaderUnlocked":
+                return "Bootloader 已解锁";
             case "magiskHideSuspected":
                 return "疑似 Root 隐藏";
             case "frameworks":

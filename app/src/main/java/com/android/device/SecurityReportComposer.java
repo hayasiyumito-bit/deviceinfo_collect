@@ -89,6 +89,7 @@ public final class SecurityReportComposer {
         boolean apatchDetected = rootSection.optBoolean("apatchDetected", false);
         boolean systemSuDetected = rootSection.optBoolean("systemSuDetected", false);
         boolean magiskHideSuspected = rootSection.optBoolean("magiskHideSuspected", false);
+        boolean bootloaderUnlocked = isBootloaderUnlocked(rootSection);
         boolean rootAccessGranted = rootSection.optBoolean("accessGranted", false);
         boolean isEmulator = environment.optBoolean("isEmulator", false);
         boolean isVpn = environment.optBoolean("isVPN", false);
@@ -104,6 +105,7 @@ public final class SecurityReportComposer {
         summary.put("apatchDetected", apatchDetected);
         summary.put("systemSuDetected", systemSuDetected);
         summary.put("magiskHideSuspected", magiskHideSuspected);
+        summary.put("bootloaderUnlocked", bootloaderUnlocked);
         summary.put("rootAccessGranted", rootAccessGranted);
         summary.put("isEmulator", isEmulator);
         summary.put("isVpn", isVpn);
@@ -128,6 +130,18 @@ public final class SecurityReportComposer {
                 || isDebug
                 || isAdbEnabled);
         return summary;
+    }
+
+    private static boolean isBootloaderUnlocked(JSONObject rootSection) {
+        JSONObject rootProbe = rootSection.optJSONObject("rootProbe");
+        if (rootProbe == null) {
+            rootProbe = rootSection.optJSONObject("magisk");
+        }
+        if (rootProbe == null) {
+            return false;
+        }
+        JSONObject shared = rootProbe.optJSONObject("sharedIndicators");
+        return shared != null && shared.optBoolean("bootloaderUnlocked", false);
     }
 
     private static JSONArray buildAnyRiskReasons(JSONObject summary, JSONObject reasons) {

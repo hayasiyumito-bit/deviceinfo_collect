@@ -135,11 +135,11 @@ public final class RootFrameworkDetector {
     };
 
     private static final String[] KERNELSU_MAPS_KEYWORDS = {
-            "kernelsu", "ksu", "ksud", "kernel_su"
+            "kernelsu", "ksud", "kernel_su", "/data/adb/ksu", "/data/adb/kernelsu"
     };
 
     private static final String[] APATCH_MAPS_KEYWORDS = {
-            "apatch", "apd", "bmax", "/data/adb/ap"
+            "apatch", "bmax", "/data/adb/ap", "/data/adb/apd"
     };
 
     private static final String[] SYSTEM_SU_MAPS_KEYWORDS = {
@@ -196,6 +196,7 @@ public final class RootFrameworkDetector {
                     ID_APATCH, "APatch", APATCH_PATHS, APATCH_PACKAGES, APATCH_MAPS_KEYWORDS,
                     APATCH_PROP_KEYS, shared, false);
             JSONObject systemSu = probeSystemSu(shared);
+            applyNativeProbeToFrameworks(magisk, kernelsu, apatch, shared.nativeProbe);
 
             JSONObject frameworks = new JSONObject();
             frameworks.put(ID_MAGISK, magisk);
@@ -207,15 +208,15 @@ public final class RootFrameworkDetector {
             boolean kernelsuDetected = kernelsu.optBoolean("detected", false);
             boolean apatchDetected = apatch.optBoolean("detected", false);
             boolean systemSuDetected = systemSu.optBoolean("detected", false);
-            boolean detected = magiskDetected || kernelsuDetected || apatchDetected || systemSuDetected;
-            boolean hideSuspected = shared.hideSuspected && !detected;
+            boolean frameworkConfirmed = magiskDetected || kernelsuDetected || apatchDetected || systemSuDetected;
+            boolean hideSuspected = shared.hideSuspected && !frameworkConfirmed;
 
             mergeReasons(combinedReasons, magisk.optJSONArray("reasons"));
             mergeReasons(combinedReasons, kernelsu.optJSONArray("reasons"));
             mergeReasons(combinedReasons, apatch.optJSONArray("reasons"));
             mergeReasons(combinedReasons, systemSu.optJSONArray("reasons"));
             if (hideSuspected) {
-                combinedReasons.put("疑似 Root 隐藏：maps/mount/Native 有信号但各框架路径不可见");
+                combinedReasons.put(buildHideSuspectedReason(shared));
             }
 
             JSONObject sharedIndicators = new JSONObject();
@@ -223,6 +224,7 @@ public final class RootFrameworkDetector {
             sharedIndicators.put("mountHits", shared.mountHits);
             sharedIndicators.put("mountInfoHits", shared.mountInfoHits);
             sharedIndicators.put("bootUnlockSignals", shared.bootUnlockSignals);
+            sharedIndicators.put("bootloaderUnlocked", shared.bootUnlockSignals.length() > 0);
             sharedIndicators.put("buildMismatches", shared.buildMismatches);
             sharedIndicators.put("selinuxMode", shared.selinuxMode);
             sharedIndicators.put("nativeProbe", shared.nativeProbe);
@@ -230,7 +232,8 @@ public final class RootFrameworkDetector {
             sharedIndicators.put("envHits", shared.envHits);
             sharedIndicators.put("hideSuspected", hideSuspected);
 
-            result.put("detected", detected || hideSuspected);
+            result.put("detected", frameworkConfirmed || hideSuspected);
+            result.put("frameworkConfirmed", frameworkConfirmed);
             result.put("magiskDetected", magiskDetected);
             result.put("kernelsuDetected", kernelsuDetected);
             result.put("apatchDetected", apatchDetected);
@@ -420,16 +423,115 @@ public final class RootFrameworkDetector {
                     scanExistingPaths(APATCH_PATHS),
                     scanExistingPaths(SYSTEM_SU_PATHS)
             );
-            ctx.javaNativeMismatches = detectJavaNativePathMismatch(ctx.nativeProbe, allPaths);
-            boolean mapsOrMountHit = ctx.mapsHits.length() > 0 || ctx.mountHits.length() > 0
-                    || ctx.mountInfoHits.length() > 0;
-            boolean nativeHit = ctx.nativeProbe.optBoolean("anyHit", false);
+            JSONArray frameworkPaths = mergeJsonArrays(
+                    scanExistingPaths(MAGISK_PATHS),
+                    scanExistingPaths(KERNELSU_PATHS),
+                    scanExistingPaths(APATCH_PATHS)
+            );
+            ctx.javaNativeMismatches = detectJavaNativePathMismatch(ctx.nativeProbe, frameworkPaths);
+            boolean javaMapsRootHit = ctx.mapsHits.length() > 0 || ctx.mountInfoHits.length() > 0
+                    || ctx.mountHits.length() > 0;
+            boolean nativeRootHit = hasNativeRootEvidence(ctx.nativeProbe);
             boolean pathVisible = allPaths.length() > 0;
-            ctx.hideSuspected = (mapsOrMountHit || nativeHit || ctx.bootUnlockSignals.length() > 0
-                    || ctx.javaNativeMismatches.length() > 0)
+            ctx.hideSuspected = (javaMapsRootHit || nativeRootHit || ctx.javaNativeMismatches.length() > 0)
                     && !pathVisible && !RootAccessHelper.isRootGranted();
             return ctx;
         }
+    }
+
+    private static String buildHideSuspectedReason(SharedContext shared) {
+        if (shared.javaNativeMismatches.length() > 0) {
+            return "疑似 Root 隐藏：Native 路径可访问但 Java 层不可见";
+        }
+        if (shared.nativeProbe.optBoolean("anyHit", false)) {
+            return "疑似 Root 隐藏：Native maps/mount 有 Root 框架信号但路径被隐藏";
+        }
+        return "疑似 Root 隐藏：maps/mount 有 Root 框架信号但路径不可见";
+    }
+
+    private static void applyNativeProbeToFrameworks(
+            JSONObject magisk,
+            JSONObject kernelsu,
+            JSONObject apatch,
+            JSONObject nativeProbe
+    ) throws JSONException {
+        if (nativeIndicatesFramework(nativeProbe, "magisk", "zygisk", "magiskpolicy", "resetprop")) {
+            markFrameworkDetectedByNative(magisk, "Native 探测命中 Magisk/Zygisk");
+        }
+        if (nativeIndicatesFramework(nativeProbe, "kernelsu", "ksud", "kernel_su")
+                || containsExactHit(nativeProbe.optJSONArray("mapsHits"), "ksu")) {
+            markFrameworkDetectedByNative(kernelsu, "Native 探测命中 KernelSU");
+        }
+        if (nativeIndicatesFramework(nativeProbe, "apatch", "bmax")) {
+            markFrameworkDetectedByNative(apatch, "Native 探测命中 APatch");
+        }
+        JSONArray accessible = nativeProbe.optJSONArray("accessiblePaths");
+        if (accessible != null) {
+            for (int i = 0; i < accessible.length(); i++) {
+                String path = accessible.optString(i).toLowerCase(Locale.US);
+                if (path.contains("magisk")) {
+                    markFrameworkDetectedByNative(magisk, "Native 路径可访问: " + accessible.optString(i));
+                } else if (path.contains("ksu") || path.contains("kernelsu")) {
+                    markFrameworkDetectedByNative(kernelsu, "Native 路径可访问: " + accessible.optString(i));
+                } else if (path.contains("/ap") || path.contains("apd")) {
+                    markFrameworkDetectedByNative(apatch, "Native 路径可访问: " + accessible.optString(i));
+                }
+            }
+        }
+    }
+
+    private static void markFrameworkDetectedByNative(JSONObject framework, String reason)
+            throws JSONException {
+        if (framework == null) {
+            return;
+        }
+        framework.put("detected", true);
+        JSONArray reasons = framework.optJSONArray("reasons");
+        if (reasons == null) {
+            reasons = new JSONArray();
+            framework.put("reasons", reasons);
+        }
+        reasons.put(reason);
+    }
+
+    private static boolean nativeIndicatesFramework(JSONObject nativeProbe, String... keywords) {
+        return containsAnyKeyword(nativeProbe.optJSONArray("mapsHits"), keywords)
+                || containsAnyKeyword(nativeProbe.optJSONArray("mountHits"), keywords);
+    }
+
+    private static boolean containsAnyKeyword(JSONArray hits, String... keywords) {
+        if (hits == null) {
+            return false;
+        }
+        for (int i = 0; i < hits.length(); i++) {
+            String value = hits.optString(i).toLowerCase(Locale.US);
+            for (String keyword : keywords) {
+                if (value.contains(keyword.toLowerCase(Locale.US))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsExactHit(JSONArray hits, String keyword) {
+        if (hits == null || keyword == null) {
+            return false;
+        }
+        for (int i = 0; i < hits.length(); i++) {
+            if (keyword.equalsIgnoreCase(hits.optString(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasNativeRootEvidence(JSONObject nativeProbe) {
+        if (nativeProbe.optBoolean("anyHit", false)) {
+            return true;
+        }
+        JSONArray accessible = nativeProbe.optJSONArray("accessiblePaths");
+        return accessible != null && accessible.length() > 0;
     }
 
     private static JSONArray collectMagiskShellHits() throws JSONException {
@@ -509,16 +611,8 @@ public final class RootFrameworkDetector {
     }
 
     private static JSONArray scanProcMounts() throws JSONException {
-        JSONArray hits = scanProcFile("/proc/mounts", concatAll(
+        return scanProcFile("/proc/mounts", concatAll(
                 MAGISK_MAPS_KEYWORDS, KERNELSU_MAPS_KEYWORDS, APATCH_MAPS_KEYWORDS));
-        String content = readFile("/proc/mounts");
-        if (content != null) {
-            String lower = content.toLowerCase(Locale.US);
-            if (lower.contains("overlay") && lower.contains("/system")) {
-                hits.put("system_overlay");
-            }
-        }
-        return hits;
     }
 
     private static JSONArray scanProcFile(String path, String[] keywords) throws JSONException {
@@ -527,13 +621,26 @@ public final class RootFrameworkDetector {
         if (content == null) {
             return hits;
         }
-        String lower = content.toLowerCase(Locale.US);
-        for (String keyword : keywords) {
-            if (lower.contains(keyword.toLowerCase(Locale.US))) {
-                hits.put(keyword);
+        for (String line : content.split("\n")) {
+            String lowerLine = line.toLowerCase(Locale.US);
+            for (String keyword : keywords) {
+                if (lineMatchesKeyword(lowerLine, keyword)) {
+                    hits.put(keyword);
+                }
             }
         }
         return hits;
+    }
+
+    private static boolean lineMatchesKeyword(String lowerLine, String keyword) {
+        String lowerKeyword = keyword.toLowerCase(Locale.US);
+        if (lowerKeyword.startsWith("/")) {
+            return lowerLine.contains(lowerKeyword);
+        }
+        if (lowerKeyword.length() < 5) {
+            return false;
+        }
+        return lowerLine.contains(lowerKeyword);
     }
 
     private static JSONArray collectPropertyHits(String allProps, String[] keys) throws JSONException {
@@ -570,8 +677,8 @@ public final class RootFrameworkDetector {
         for (String line : env.split("\n")) {
             String lower = line.toLowerCase(Locale.US);
             if (lower.contains("magisk") || lower.contains("zygisk")
-                    || lower.contains("kernelsu") || lower.contains("ksu")
-                    || lower.contains("apatch") || lower.contains("apd")) {
+                    || lower.contains("kernelsu") || lower.contains("ksud")
+                    || lower.contains("apatch") || lower.contains("/data/adb/ap")) {
                 hits.put(line.trim());
             }
         }
