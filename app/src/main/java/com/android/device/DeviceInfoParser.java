@@ -631,17 +631,33 @@ public final class DeviceInfoParser {
             case "isRooted":
                 return "已 Root";
             case "magiskDetected":
-                return "检测到 Magisk/Root";
+                return "检测到 Magisk";
+            case "kernelsuDetected":
+                return "检测到 KernelSU";
+            case "apatchDetected":
+                return "检测到 APatch";
+            case "systemSuDetected":
+                return "检测到系统 su";
             case "magiskHideSuspected":
-                return "疑似 Magisk Hide";
+                return "疑似 Root 隐藏";
+            case "frameworks":
+                return "Root 框架分类探测";
+            case "rootProbe":
+                return "Root 框架深度探测";
             case "magisk":
-                return "Magisk 深度探测";
+                return "Root 框架探测(兼容字段)";
+            case "sharedIndicators":
+                return "Root 共享探测指标";
             case "hideSuspected":
                 return "疑似隐藏 Root";
             case "nativeProbe":
-                return "Native Magisk 探测";
+                return "Native Root 探测";
             case "matchedPaths":
-                return "Magisk 路径命中";
+                return "Root 路径命中";
+            case "packageHits":
+                return "Root 管理器安装包";
+            case "propertyHits":
+                return "Root 框架属性";
             case "mapsHits":
                 return "maps 命中";
             case "mountHits":
@@ -652,6 +668,14 @@ public final class DeviceInfoParser {
                 return "Shell 探测命中";
             case "magiskProperties":
                 return "Magisk 相关属性";
+            case "displayName":
+                return "框架名称";
+            case "systemSu":
+                return "系统 su";
+            case "kernelsu":
+                return "KernelSU";
+            case "apatch":
+                return "APatch";
             case "bootUnlockSignals":
                 return "Boot 解锁信号";
             case "buildMismatches":

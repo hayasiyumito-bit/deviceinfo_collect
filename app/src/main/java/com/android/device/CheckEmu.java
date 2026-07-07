@@ -44,10 +44,14 @@ public final class CheckEmu {
             "/system/xbin/su",
             "/sbin/su",
             "/system/sbin/su",
+            "/system/usr/we-need-root/su",
             "/data/local/su",
             "/data/local/bin/su",
             "/data/local/xbin/su",
+            "/system/xbin/daemonsu",
             "/data/adb/magisk",
+            "/data/adb/ksu",
+            "/data/adb/ap",
             "/sbin/.magisk"
     };
 
@@ -72,7 +76,10 @@ public final class CheckEmu {
             "magisk",
             "zygisk",
             "magiskpolicy",
-            "kernelsu"
+            "kernelsu",
+            "ksu",
+            "apatch",
+            "apd"
     };
 
     private CheckEmu() {
@@ -147,17 +154,26 @@ public final class CheckEmu {
         JSONObject root = new JSONObject();
         try {
             JSONObject indicators = buildRootIndicators();
-            JSONObject magisk = MagiskRootDetector.probe(context);
-            boolean magiskDetected = magisk.optBoolean("detected", false);
-            boolean rooted = hasPositiveRootIndicator(indicators) || magiskDetected;
+            JSONObject rootProbe = RootFrameworkDetector.probe(context);
+            boolean magiskDetected = rootProbe.optBoolean("magiskDetected", false);
+            boolean kernelsuDetected = rootProbe.optBoolean("kernelsuDetected", false);
+            boolean apatchDetected = rootProbe.optBoolean("apatchDetected", false);
+            boolean systemSuDetected = rootProbe.optBoolean("systemSuDetected", false);
+            boolean frameworkDetected = rootProbe.optBoolean("detected", false);
+            boolean rooted = hasPositiveRootIndicator(indicators) || frameworkDetected;
 
             root.put("isRooted", rooted);
             root.put("magiskDetected", magiskDetected);
-            root.put("magiskHideSuspected", magisk.optBoolean("hideSuspected", false));
+            root.put("kernelsuDetected", kernelsuDetected);
+            root.put("apatchDetected", apatchDetected);
+            root.put("systemSuDetected", systemSuDetected);
+            root.put("magiskHideSuspected", rootProbe.optBoolean("hideSuspected", false));
             root.put("accessGranted", RootAccessHelper.isRootGranted());
             root.put("accessDetail", RootAccessHelper.getAttemptDetail());
             root.put("indicators", indicators);
-            root.put("magisk", magisk);
+            root.put("frameworks", rootProbe.optJSONObject("frameworks"));
+            root.put("rootProbe", rootProbe);
+            root.put("magisk", rootProbe);
         } catch (JSONException e) {
             Log.e(TAG, "buildRootSection failed", e);
         }
@@ -251,16 +267,19 @@ public final class CheckEmu {
                 reasons.put("vzw.os.rooted 指示已 Root");
             }
         }
-        JSONObject magisk = rootSection.optJSONObject("magisk");
-        if (magisk != null) {
-            JSONArray magiskReasons = magisk.optJSONArray("reasons");
-            if (magiskReasons != null) {
-                for (int i = 0; i < magiskReasons.length(); i++) {
-                    reasons.put(magiskReasons.optString(i));
+        JSONObject rootProbe = rootSection.optJSONObject("rootProbe");
+        if (rootProbe == null) {
+            rootProbe = rootSection.optJSONObject("magisk");
+        }
+        if (rootProbe != null) {
+            JSONArray probeReasons = rootProbe.optJSONArray("reasons");
+            if (probeReasons != null) {
+                for (int i = 0; i < probeReasons.length(); i++) {
+                    reasons.put(probeReasons.optString(i));
                 }
             }
             if (rootSection.optBoolean("magiskHideSuspected", false)) {
-                reasons.put("疑似 Magisk Hide：检测信号存在但 su/路径被隐藏");
+                reasons.put("疑似 Root 隐藏：检测信号存在但 su/路径被隐藏");
             }
         }
         return reasons;

@@ -85,6 +85,9 @@ public final class SecurityReportComposer {
         boolean propertyTampered = hookSection.optBoolean("propertyTampered", false);
         boolean isRooted = rootSection.optBoolean("isRooted", false);
         boolean magiskDetected = rootSection.optBoolean("magiskDetected", false);
+        boolean kernelsuDetected = rootSection.optBoolean("kernelsuDetected", false);
+        boolean apatchDetected = rootSection.optBoolean("apatchDetected", false);
+        boolean systemSuDetected = rootSection.optBoolean("systemSuDetected", false);
         boolean magiskHideSuspected = rootSection.optBoolean("magiskHideSuspected", false);
         boolean rootAccessGranted = rootSection.optBoolean("accessGranted", false);
         boolean isEmulator = environment.optBoolean("isEmulator", false);
@@ -97,6 +100,9 @@ public final class SecurityReportComposer {
         summary.put("propertyTampered", propertyTampered);
         summary.put("isRooted", isRooted);
         summary.put("magiskDetected", magiskDetected);
+        summary.put("kernelsuDetected", kernelsuDetected);
+        summary.put("apatchDetected", apatchDetected);
+        summary.put("systemSuDetected", systemSuDetected);
         summary.put("magiskHideSuspected", magiskHideSuspected);
         summary.put("rootAccessGranted", rootAccessGranted);
         summary.put("isEmulator", isEmulator);
@@ -105,11 +111,15 @@ public final class SecurityReportComposer {
         summary.put("simulatorDetected", simulatorDetected);
         summary.put("isAdbEnabled", isAdbEnabled);
         summary.put("anyHookSignal", hookFrameworkDetected || propertyTampered);
-        summary.put("anyRootSignal", isRooted || rootAccessGranted || magiskDetected || magiskHideSuspected);
+        summary.put("anyRootSignal", isRooted || rootAccessGranted || magiskDetected
+                || kernelsuDetected || apatchDetected || systemSuDetected || magiskHideSuspected);
         summary.put("anyRisk", hookFrameworkDetected
                 || propertyTampered
                 || isRooted
                 || magiskDetected
+                || kernelsuDetected
+                || apatchDetected
+                || systemSuDetected
                 || magiskHideSuspected
                 || rootAccessGranted
                 || isEmulator
@@ -129,6 +139,9 @@ public final class SecurityReportComposer {
         appendReasonsIf(summary, reasons, unique, "propertyTampered", "propertyTamper");
         appendReasonsIf(summary, reasons, unique, "isRooted", "rootAccessGranted", "root");
         appendReasonsIf(summary, reasons, unique, "magiskDetected", "magiskHideSuspected", "root");
+        appendReasonsIf(summary, reasons, unique, "kernelsuDetected", "kernelsuDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "apatchDetected", "apatchDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "systemSuDetected", "rootAccessGranted", "root");
         if (summary.optBoolean("isEmulator", false)
                 || summary.optBoolean("isVpn", false)
                 || summary.optBoolean("isDebug", false)) {

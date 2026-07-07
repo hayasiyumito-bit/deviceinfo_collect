@@ -158,12 +158,19 @@ static const char *kNativeMagiskPaths[] = {
         "/data/adb/magisk",
         "/data/adb/magisk.db",
         "/data/adb/modules",
+        "/data/adb/ksu",
+        "/data/adb/kernelsu",
+        "/data/adb/ap",
+        "/data/adb/apd",
+        "/system/bin/su",
+        "/system/xbin/su",
         "/debug_ramdisk/magisk",
         nullptr
 };
 
 static const char *kNativeMagiskKeywords[] = {
-        "magisk", "zygisk", "magiskpolicy", "kernelsu", nullptr
+        "magisk", "zygisk", "magiskpolicy", "kernelsu", "ksu", "ksud",
+        "apatch", "apd", "supersu", "daemonsu", nullptr
 };
 
 static void append_json_string(char *buf, size_t cap, const char *value, bool *first) {
