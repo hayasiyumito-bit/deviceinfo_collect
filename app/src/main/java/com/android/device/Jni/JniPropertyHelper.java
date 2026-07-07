@@ -38,6 +38,19 @@ public final class JniPropertyHelper {
         }
     }
 
+    public static String getMagiskNativeProbe() {
+        if (!jniUsable) {
+            return "{}";
+        }
+        try {
+            String value = JniInterface.getMagiskNativeProbe();
+            return value != null ? value.trim() : "{}";
+        } catch (Throwable t) {
+            Log.w(TAG, "Native magisk probe failed", t);
+            return "{}";
+        }
+    }
+
     private static String readProperty(String key, PropertyReader reader) {
         if (!jniUsable || key == null || key.isEmpty()) {
             return "";

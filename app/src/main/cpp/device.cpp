@@ -1,6 +1,8 @@
 #include <jni.h>
 #include <dlfcn.h>
 #include <cstring>
+#include <cstdio>
+#include <unistd.h>
 
 #include <sys/system_properties.h>
 #include <android/sensor.h>
@@ -148,4 +150,74 @@ Java_com_android_device_Jni_JniInterface_getNativePropertyDiagnostics(JNIEnv *en
             ? "{\"jniGet\":\"__system_property_get\",\"jniFind\":\"__system_property_find+__system_property_read\",\"libcutils\":\"libcutils.property_get\"}"
             : "{\"jniGet\":\"__system_property_get\",\"jniFind\":\"__system_property_find+__system_property_read\",\"libcutils\":\"unavailable\"}";
     return env->NewStringUTF(diag);
+}
+
+static const char *kNativeMagiskPaths[] = {
+        "/sbin/magisk",
+        "/sbin/.magisk",
+        "/data/adb/magisk",
+        "/data/adb/magisk.db",
+        "/data/adb/modules",
+        "/debug_ramdisk/magisk",
+        nullptr
+};
+
+static const char *kNativeMagiskKeywords[] = {
+        "magisk", "zygisk", "magiskpolicy", "kernelsu", nullptr
+};
+
+static void append_json_string(char *buf, size_t cap, const char *value, bool *first) {
+    if (value == nullptr || buf == nullptr || first == nullptr) {
+        return;
+    }
+    size_t len = strnlen(buf, cap);
+    int written = snprintf(buf + len, cap - len, "%s\"%s\"", *first ? "" : ",", value);
+    if (written > 0 && static_cast<size_t>(written) < cap - len) {
+        *first = false;
+    }
+}
+
+static void append_keyword_hits(const char *path, const char **keywords, char *out, size_t cap) {
+    strncat(out, "[", cap - strlen(out) - 1);
+    FILE *fp = fopen(path, "r");
+    if (fp == nullptr) {
+        strncat(out, "]", cap - strlen(out) - 1);
+        return;
+    }
+    char line[512];
+    bool first = true;
+    while (fgets(line, sizeof(line), fp) != nullptr) {
+        for (int i = 0; keywords[i] != nullptr; ++i) {
+            if (strstr(line, keywords[i]) != nullptr) {
+                append_json_string(out, cap, keywords[i], &first);
+                break;
+            }
+        }
+    }
+    fclose(fp);
+    strncat(out, "]", cap - strlen(out) - 1);
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getMagiskNativeProbe(JNIEnv *env, jclass clazz) {
+    (void) clazz;
+    char json[4096];
+    snprintf(json, sizeof(json), "{\"accessiblePaths\":[");
+    bool first = true;
+    for (int i = 0; kNativeMagiskPaths[i] != nullptr; ++i) {
+        if (access(kNativeMagiskPaths[i], F_OK) == 0) {
+            append_json_string(json, sizeof(json), kNativeMagiskPaths[i], &first);
+        }
+    }
+    strncat(json, "],\"mapsHits\":", sizeof(json) - strlen(json) - 1);
+    size_t offset = strlen(json);
+    append_keyword_hits("/proc/self/maps", kNativeMagiskKeywords, json + offset,
+                        sizeof(json) - offset);
+    strncat(json, ",\"mountHits\":", sizeof(json) - strlen(json) - 1);
+    offset = strlen(json);
+    append_keyword_hits("/proc/self/mountinfo", kNativeMagiskKeywords, json + offset,
+                        sizeof(json) - offset);
+    strncat(json, "}", sizeof(json) - strlen(json) - 1);
+    return env->NewStringUTF(json);
 }

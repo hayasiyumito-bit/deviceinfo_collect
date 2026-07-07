@@ -26,7 +26,7 @@ public final class SecurityReportComposer {
         JSONObject security = new JSONObject();
         try {
             JSONObject hookSection = CheckEmu.buildHookSection();
-            JSONObject rootSection = CheckEmu.buildRootSection();
+            JSONObject rootSection = CheckEmu.buildRootSection(context);
             JSONObject environment = HackChecker.getEnvCheckerInfo(context);
             JSONObject simulator = SimulatorChecker.buildDetail(context);
 
@@ -84,6 +84,8 @@ public final class SecurityReportComposer {
         boolean hookFrameworkDetected = hookSection.optBoolean("frameworkDetected", false);
         boolean propertyTampered = hookSection.optBoolean("propertyTampered", false);
         boolean isRooted = rootSection.optBoolean("isRooted", false);
+        boolean magiskDetected = rootSection.optBoolean("magiskDetected", false);
+        boolean magiskHideSuspected = rootSection.optBoolean("magiskHideSuspected", false);
         boolean rootAccessGranted = rootSection.optBoolean("accessGranted", false);
         boolean isEmulator = environment.optBoolean("isEmulator", false);
         boolean isVpn = environment.optBoolean("isVPN", false);
@@ -94,6 +96,8 @@ public final class SecurityReportComposer {
         summary.put("hookFrameworkDetected", hookFrameworkDetected);
         summary.put("propertyTampered", propertyTampered);
         summary.put("isRooted", isRooted);
+        summary.put("magiskDetected", magiskDetected);
+        summary.put("magiskHideSuspected", magiskHideSuspected);
         summary.put("rootAccessGranted", rootAccessGranted);
         summary.put("isEmulator", isEmulator);
         summary.put("isVpn", isVpn);
@@ -101,10 +105,12 @@ public final class SecurityReportComposer {
         summary.put("simulatorDetected", simulatorDetected);
         summary.put("isAdbEnabled", isAdbEnabled);
         summary.put("anyHookSignal", hookFrameworkDetected || propertyTampered);
-        summary.put("anyRootSignal", isRooted || rootAccessGranted);
+        summary.put("anyRootSignal", isRooted || rootAccessGranted || magiskDetected || magiskHideSuspected);
         summary.put("anyRisk", hookFrameworkDetected
                 || propertyTampered
                 || isRooted
+                || magiskDetected
+                || magiskHideSuspected
                 || rootAccessGranted
                 || isEmulator
                 || simulatorDetected
@@ -122,6 +128,7 @@ public final class SecurityReportComposer {
         appendReasonsIf(summary, reasons, unique, "hookFrameworkDetected", "propertyTampered", "hook");
         appendReasonsIf(summary, reasons, unique, "propertyTampered", "propertyTamper");
         appendReasonsIf(summary, reasons, unique, "isRooted", "rootAccessGranted", "root");
+        appendReasonsIf(summary, reasons, unique, "magiskDetected", "magiskHideSuspected", "root");
         if (summary.optBoolean("isEmulator", false)
                 || summary.optBoolean("isVpn", false)
                 || summary.optBoolean("isDebug", false)) {

@@ -68,7 +68,11 @@ public final class CheckEmu {
             "lsposed",
             "substrate",
             "yumyhook",
-            "lspd"
+            "lspd",
+            "magisk",
+            "zygisk",
+            "magiskpolicy",
+            "kernelsu"
     };
 
     private CheckEmu() {
@@ -78,7 +82,7 @@ public final class CheckEmu {
         JSONObject legacy = new JSONObject();
         try {
             JSONObject hook = buildHookSection();
-            JSONObject root = buildRootSection();
+            JSONObject root = buildRootSection(context);
             legacy.put("hookFrameworkDetected", hook.optBoolean("frameworkDetected"));
             legacy.put("isPropertyTampered", hook.optBoolean("propertyTampered"));
             legacy.put("propertyProbes", hook.optJSONObject("propertyProbes"));
@@ -139,14 +143,21 @@ public final class CheckEmu {
         return diagnostics;
     }
 
-    public static JSONObject buildRootSection() {
+    public static JSONObject buildRootSection(Context context) {
         JSONObject root = new JSONObject();
         try {
             JSONObject indicators = buildRootIndicators();
-            root.put("isRooted", hasPositiveRootIndicator(indicators));
+            JSONObject magisk = MagiskRootDetector.probe(context);
+            boolean magiskDetected = magisk.optBoolean("detected", false);
+            boolean rooted = hasPositiveRootIndicator(indicators) || magiskDetected;
+
+            root.put("isRooted", rooted);
+            root.put("magiskDetected", magiskDetected);
+            root.put("magiskHideSuspected", magisk.optBoolean("hideSuspected", false));
             root.put("accessGranted", RootAccessHelper.isRootGranted());
             root.put("accessDetail", RootAccessHelper.getAttemptDetail());
             root.put("indicators", indicators);
+            root.put("magisk", magisk);
         } catch (JSONException e) {
             Log.e(TAG, "buildRootSection failed", e);
         }
@@ -210,36 +221,47 @@ public final class CheckEmu {
             reasons.put("Root 授权探测成功: " + rootSection.optString("accessDetail", ""));
         }
         JSONObject indicators = rootSection.optJSONObject("indicators");
-        if (indicators == null) {
-            return reasons;
-        }
-        JSONArray matchedSuPaths = indicators.optJSONArray("matchedSuPaths");
-        if (matchedSuPaths != null) {
-            for (int i = 0; i < matchedSuPaths.length(); i++) {
-                reasons.put("存在 su 路径: " + matchedSuPaths.optString(i));
+        if (indicators != null) {
+            JSONArray matchedSuPaths = indicators.optJSONArray("matchedSuPaths");
+            if (matchedSuPaths != null) {
+                for (int i = 0; i < matchedSuPaths.length(); i++) {
+                    reasons.put("存在 su 路径: " + matchedSuPaths.optString(i));
+                }
+            }
+            String suWhichPath = indicators.optString("suWhichPath", "");
+            if (!suWhichPath.isEmpty()) {
+                reasons.put("which su 可用: " + suWhichPath);
+            }
+            JSONArray matchedMagiskPaths = indicators.optJSONArray("matchedMagiskPaths");
+            if (matchedMagiskPaths != null) {
+                for (int i = 0; i < matchedMagiskPaths.length(); i++) {
+                    reasons.put("Magisk 路径存在: " + matchedMagiskPaths.optString(i));
+                }
+            }
+            if (indicators.optBoolean("testKeysBuild", false)) {
+                reasons.put("构建标签含 test-keys: " + Build.TAGS);
+            }
+            if (indicators.optBoolean("roSecureOff", false)) {
+                reasons.put("ro.secure=0");
+            }
+            if (indicators.optBoolean("roDebuggableOn", false)) {
+                reasons.put("ro.debuggable=1");
+            }
+            if (indicators.optBoolean("rootedSystemProperty", false)) {
+                reasons.put("vzw.os.rooted 指示已 Root");
             }
         }
-        String suWhichPath = indicators.optString("suWhichPath", "");
-        if (!suWhichPath.isEmpty()) {
-            reasons.put("which su 可用: " + suWhichPath);
-        }
-        JSONArray matchedMagiskPaths = indicators.optJSONArray("matchedMagiskPaths");
-        if (matchedMagiskPaths != null) {
-            for (int i = 0; i < matchedMagiskPaths.length(); i++) {
-                reasons.put("Magisk 路径存在: " + matchedMagiskPaths.optString(i));
+        JSONObject magisk = rootSection.optJSONObject("magisk");
+        if (magisk != null) {
+            JSONArray magiskReasons = magisk.optJSONArray("reasons");
+            if (magiskReasons != null) {
+                for (int i = 0; i < magiskReasons.length(); i++) {
+                    reasons.put(magiskReasons.optString(i));
+                }
             }
-        }
-        if (indicators.optBoolean("testKeysBuild", false)) {
-            reasons.put("构建标签含 test-keys: " + Build.TAGS);
-        }
-        if (indicators.optBoolean("roSecureOff", false)) {
-            reasons.put("ro.secure=0");
-        }
-        if (indicators.optBoolean("roDebuggableOn", false)) {
-            reasons.put("ro.debuggable=1");
-        }
-        if (indicators.optBoolean("rootedSystemProperty", false)) {
-            reasons.put("vzw.os.rooted 指示已 Root");
+            if (rootSection.optBoolean("magiskHideSuspected", false)) {
+                reasons.put("疑似 Magisk Hide：检测信号存在但 su/路径被隐藏");
+            }
         }
         return reasons;
     }

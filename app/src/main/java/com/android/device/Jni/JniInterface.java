@@ -21,4 +21,7 @@ public class JniInterface {
 
     /** 返回各 JNI 通道实际调用的 native API 说明（JSON 字符串）。 */
     public static native String getNativePropertyDiagnostics();
+
+    /** Native 层 Magisk/Root 路径与 maps/mount 探测（JSON）。 */
+    public static native String getMagiskNativeProbe();
 }

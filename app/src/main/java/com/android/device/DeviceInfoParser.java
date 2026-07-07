@@ -630,6 +630,40 @@ public final class DeviceInfoParser {
                 return "Root 授权详情";
             case "isRooted":
                 return "已 Root";
+            case "magiskDetected":
+                return "检测到 Magisk/Root";
+            case "magiskHideSuspected":
+                return "疑似 Magisk Hide";
+            case "magisk":
+                return "Magisk 深度探测";
+            case "hideSuspected":
+                return "疑似隐藏 Root";
+            case "nativeProbe":
+                return "Native Magisk 探测";
+            case "matchedPaths":
+                return "Magisk 路径命中";
+            case "mapsHits":
+                return "maps 命中";
+            case "mountHits":
+                return "mounts 命中";
+            case "mountInfoHits":
+                return "mountinfo 命中";
+            case "shellHits":
+                return "Shell 探测命中";
+            case "magiskProperties":
+                return "Magisk 相关属性";
+            case "bootUnlockSignals":
+                return "Boot 解锁信号";
+            case "buildMismatches":
+                return "Build 与属性不一致";
+            case "suspiciousPackages":
+                return "可疑安装包";
+            case "selinuxMode":
+                return "SELinux 模式";
+            case "suReadlink":
+                return "su 符号链接";
+            case "idOutput":
+                return "id 命令输出";
             case "isAdbEnabled":
                 return "ADB 调试已开启";
             case "isPropertyTampered":
