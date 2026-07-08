@@ -163,6 +163,8 @@ static const char *kNativeMagiskPaths[] = {
         "/data/adb/ap",
         "/data/adb/apd",
         "/debug_ramdisk/magisk",
+        "/debug_ramdisk/.magisk",
+        "/data/adb/modules/zygisk",
         nullptr
 };
 

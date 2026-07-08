@@ -238,11 +238,44 @@ public final class DeviceInfoParser {
                         "安全检测",
                         summary.toString()
                 ));
-                items.addAll(createExpandedFieldItems("security.summary", summary.toString(), "安全检测"));
+                // 核心 Root 检测项置顶展示
+                String[] rootSummaryKeys = {
+                        "apatchDetected",
+                        "apatchEnhancedDetected",
+                        "magiskDetected",
+                        "kernelsuDetected",
+                        "kernelsuBackupDetected",
+                        "systemSuDetected",
+                        "suBinaryFound",
+                        "rootManagerDetected",
+                        "busyboxDetected",
+                        "rootHideDetected",
+                        "dangerousAppDetected"
+                };
+                for (String key : rootSummaryKeys) {
+                    if (summary.has(key)) {
+                        Object val = summary.get(key);
+                        items.add(new DeviceInfoItem(
+                                "security.summary." + key,
+                                translateKey(key),
+                                formatValue(val),
+                                "安全检测",
+                                String.valueOf(val)
+                        ));
+                    }
+                }
+                // 展示其它摘要项
+                items.addAll(createExpandedFieldItems(
+                        "security.summary",
+                        summary.toString(),
+                        "安全检测",
+                        concat(rootSummaryKeys, new String[]{"anyRisk", "anyHookSignal", "anyRootSignal"})
+                ));
             }
 
             appendReasonBlock(items, security.optJSONObject("reasons"), "hook", "Hook 检测原因");
             appendReasonBlock(items, security.optJSONObject("reasons"), "root", "Root 检测原因");
+            // ...
             appendReasonBlock(items, security.optJSONObject("reasons"), "propertyTamper", "属性篡改原因");
             appendReasonBlock(items, security.optJSONObject("reasons"), "environment", "环境检测原因");
             appendReasonBlock(items, security.optJSONObject("reasons"), "adb", "ADB 检测原因");
@@ -304,6 +337,13 @@ public final class DeviceInfoParser {
                 fullValue
         ));
         items.addAll(createExpandedFieldItems(prefix, fullValue, "安全检测"));
+    }
+
+    private static String[] concat(String[] a, String[] b) {
+        String[] result = new String[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
     }
 
     private static String formatReasonArray(JSONArray array) throws JSONException {
@@ -692,14 +732,28 @@ public final class DeviceInfoParser {
                 return "Root 授权详情";
             case "isRooted":
                 return "已 Root";
-            case "magiskDetected":
-                return "检测到 Magisk";
             case "kernelsuDetected":
-                return "检测到 KernelSU";
+                return "KernelSU";
+            case "kernelsuBackupDetected":
+                return "KernelSU (备选)";
             case "apatchDetected":
-                return "检测到 APatch";
+                return "APatch";
+            case "apatchEnhancedDetected":
+                return "APatch (增强型)";
             case "systemSuDetected":
-                return "检测到系统 su";
+                return "系统 Root (su)";
+            case "suBinaryFound":
+                return "找到 SU 可执行文件";
+            case "rootManagerDetected":
+                return "Root 管理器应用 / 分支";
+            case "busyboxDetected":
+                return "BusyBox 二进制文件";
+            case "rootHideDetected":
+                return "Root 隐藏应用";
+            case "dangerousAppDetected":
+                return "危险应用 / 修改工具";
+            case "magiskDetected":
+                return "Magisk";
             case "frameworkConfirmed":
                 return "Root 框架已确认";
             case "bootloaderUnlocked":
@@ -740,8 +794,22 @@ public final class DeviceInfoParser {
                 return "系统 su";
             case "kernelsu":
                 return "KernelSU";
+            case "kernelsuBackup":
+                return "KernelSU (备选)";
             case "apatch":
                 return "APatch";
+            case "apatchEnhanced":
+                return "APatch (增强型)";
+            case "suBinary":
+                return "找到 SU 可执行文件";
+            case "rootManager":
+                return "Root 管理器应用 / 分支";
+            case "busybox":
+                return "BusyBox 二进制文件";
+            case "rootHide":
+                return "Root 隐藏应用";
+            case "dangerousApp":
+                return "危险应用 / 修改工具";
             case "bootUnlockSignals":
                 return "Boot 解锁信号";
             case "buildMismatches":

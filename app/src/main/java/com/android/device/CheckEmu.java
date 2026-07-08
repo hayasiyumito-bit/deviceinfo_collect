@@ -157,9 +157,17 @@ public final class CheckEmu {
             JSONObject rootProbe = RootFrameworkDetector.probe(context);
             boolean magiskDetected = rootProbe.optBoolean("magiskDetected", false);
             boolean kernelsuDetected = rootProbe.optBoolean("kernelsuDetected", false);
+            boolean kernelsuBackupDetected = rootProbe.optBoolean("kernelsuBackupDetected", false);
             boolean apatchDetected = rootProbe.optBoolean("apatchDetected", false);
+            boolean apatchEnhancedDetected = rootProbe.optBoolean("apatchEnhancedDetected", false);
             boolean systemSuDetected = rootProbe.optBoolean("systemSuDetected", false);
-            boolean frameworkConfirmed = magiskDetected || kernelsuDetected || apatchDetected || systemSuDetected;
+            boolean suBinaryFound = rootProbe.optBoolean("suBinaryFound", false);
+            boolean rootManagerDetected = rootProbe.optBoolean("rootManagerDetected", false);
+            boolean busyboxDetected = rootProbe.optBoolean("busyboxDetected", false);
+            boolean rootHideDetected = rootProbe.optBoolean("rootHideDetected", false);
+            boolean dangerousAppDetected = rootProbe.optBoolean("dangerousAppDetected", false);
+
+            boolean frameworkConfirmed = rootProbe.optBoolean("frameworkConfirmed", false);
             boolean hideSuspected = rootProbe.optBoolean("hideSuspected", false);
             boolean rooted = hasPositiveRootIndicator(indicators) || frameworkConfirmed;
 
@@ -167,8 +175,15 @@ public final class CheckEmu {
             root.put("frameworkConfirmed", frameworkConfirmed);
             root.put("magiskDetected", magiskDetected);
             root.put("kernelsuDetected", kernelsuDetected);
+            root.put("kernelsuBackupDetected", kernelsuBackupDetected);
             root.put("apatchDetected", apatchDetected);
+            root.put("apatchEnhancedDetected", apatchEnhancedDetected);
             root.put("systemSuDetected", systemSuDetected);
+            root.put("suBinaryFound", suBinaryFound);
+            root.put("rootManagerDetected", rootManagerDetected);
+            root.put("busyboxDetected", busyboxDetected);
+            root.put("rootHideDetected", rootHideDetected);
+            root.put("dangerousAppDetected", dangerousAppDetected);
             root.put("magiskHideSuspected", hideSuspected);
             root.put("accessGranted", RootAccessHelper.isRootGranted());
             root.put("accessDetail", RootAccessHelper.getAttemptDetail());

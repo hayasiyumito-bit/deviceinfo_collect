@@ -127,11 +127,13 @@ public final class SecurityRemediationBuilder {
 
         if (summary.optBoolean("magiskHideSuspected", false)) {
             addItem(items, "root_hide_suspected", "medium", "root_hide",
-                    "疑似 Root 已隐藏：存在 maps/mount/Native 信号但 Java 路径不可见",
+                    "疑似 Root 已隐藏：存在 maps/mount/Native/df/ps 信号但 Java 路径不可见",
                     "YumyHook Java+Native 双层对齐",
-                    "Java File.exists 与 Native access 结果须一致；补齐 ProcMaps + native_bridge",
+                    "Java File.exists 与 Native access 结果须一致；补齐 ProcMaps + native_bridge + Shell df/ps 过滤",
                     "magiskHideSuspected=false");
         }
+
+        appendPersieRemediation(items, rootProbe);
 
         if (nativeProbe != null) {
             appendNativeProbeRemediation(items, nativeProbe);
@@ -382,6 +384,55 @@ public final class SecurityRemediationBuilder {
                 return "RootFrameworkDetector.bootUnlockSignals";
             default:
                 return "SecurityReportComposer";
+        }
+    }
+
+    private static void appendPersieRemediation(JSONArray items, JSONObject rootProbe) throws JSONException {
+        if (rootProbe == null) {
+            return;
+        }
+        JSONObject persie = rootProbe.optJSONObject("persieAligned");
+        if (persie == null) {
+            persie = rootProbe.optJSONObject("sharedIndicators") != null
+                    ? rootProbe.optJSONObject("sharedIndicators").optJSONObject("persieAligned")
+                    : null;
+        }
+        if (persie == null || !persie.optBoolean("detected", false)) {
+            return;
+        }
+        JSONObject indicators = persie.optJSONObject("indicators");
+        if (indicators == null) {
+            return;
+        }
+        if (indicators.optJSONArray("dfHits") != null && indicators.optJSONArray("dfHits").length() > 0) {
+            addItem(items, "persie_df_magisk", "high", "root_shell",
+                    "df 输出含 Magisk/Zygisk 挂载",
+                    "YumyHook/ShellProbeStealthHook.kt + ShellOutputFilter.kt",
+                    "拦截 df 命令并过滤含 magisk/zygisk/ksu 的行",
+                    "persieAligned.indicators.dfHits=[]");
+        }
+        if (indicators.optJSONArray("psHits") != null && indicators.optJSONArray("psHits").length() > 0) {
+            addItem(items, "persie_ps_zygisk", "high", "root_shell",
+                    "ps 输出含 magiskd/zygisk/ksud",
+                    "YumyHook/ShellProbeStealthHook.kt",
+                    "拦截 ps/ps -A 并过滤 root 框架进程名",
+                    "persieAligned.indicators.psHits=[]");
+        }
+        if (indicators.optJSONArray("unixSocketHits") != null
+                && indicators.optJSONArray("unixSocketHits").length() > 0) {
+            addItem(items, "persie_unix_socket", "high", "root_proc",
+                    "/proc/net/unix 含 @magisk/@zygisk 等",
+                    "YumyHook/native_bridge.cpp fopen/fgets",
+                    "过滤 /proc/net/unix 行中含 @magisk/@zygisk/@ksud/@apatch/@riru",
+                    "persieAligned.indicators.unixSocketHits=[]");
+        }
+        if (indicators.optJSONArray("suspiciousMountHits") != null
+                && indicators.optJSONArray("suspiciousMountHits").length() > 0) {
+            addItem(items, "persie_mount_regex", "high", "root_proc",
+                    "挂载表命中 persie 可疑正则",
+                    "YumyHook/native_bridge.cpp + ProcMapsStealthHook.kt",
+                    "双层过滤 mountinfo/mounts 中 magisk/zygisk/ksu/apatch overlay 特征",
+                    "persieAligned.indicators.suspiciousMountHits=[]");
         }
     }
 

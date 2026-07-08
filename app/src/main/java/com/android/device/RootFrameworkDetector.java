@@ -28,8 +28,15 @@ public final class RootFrameworkDetector {
 
     private static final String ID_MAGISK = "magisk";
     private static final String ID_KERNELSU = "kernelsu";
+    private static final String ID_KERNELSU_BACKUP = "kernelsuBackup";
     private static final String ID_APATCH = "apatch";
+    private static final String ID_APATCH_ENHANCED = "apatchEnhanced";
     private static final String ID_SYSTEM_SU = "systemSu";
+    private static final String ID_SU_BINARY = "suBinary";
+    private static final String ID_ROOT_MANAGER = "rootManager";
+    private static final String ID_BUSYBOX = "busybox";
+    private static final String ID_ROOT_HIDE = "rootHide";
+    private static final String ID_DANGEROUS_APP = "dangerousApp";
 
     private static final String[] MAGISK_PATHS = {
             "/sbin/magisk",
@@ -37,6 +44,10 @@ public final class RootFrameworkDetector {
             "/sbin/.magisk",
             "/debug_ramdisk/magisk",
             "/debug_ramdisk/.magisk",
+            "/data/adb/modules/zygisk",
+            "/dev/.magisk_unblock",
+            "/apex/com.android.art/.magisk",
+            "/sbin/.magisk",
             "/data/adb/magisk",
             "/data/adb/magisk.db",
             "/data/adb/magisk.img",
@@ -58,7 +69,6 @@ public final class RootFrameworkDetector {
 
     private static final String[] KERNELSU_PATHS = {
             "/data/adb/ksu",
-            "/data/adb/kernelsu",
             "/data/adb/ksud",
             "/data/adb/ksu/bin",
             "/data/adb/ksu/modules",
@@ -69,17 +79,43 @@ public final class RootFrameworkDetector {
             "/data/adb/ksu/.allowlist"
     };
 
+    private static final String[] KERNELSU_BACKUP_PATHS = {
+            "/data/adb/kernelsu",
+            "/data/adb/kernelsu/bin",
+            "/data/adb/kernelsu/modules",
+            "/system/bin/kernelsu",
+            "/system/xbin/kernelsu"
+    };
+
     private static final String[] APATCH_PATHS = {
             "/data/adb/ap",
             "/data/adb/apd",
             "/data/adb/ap/bin",
             "/data/adb/apd.apk",
             "/data/adb/ap/modules",
-            "/data/adb/ap/log",
+            "/data/adb/ap/log"
+    };
+
+    private static final String[] APATCH_ENHANCED_PATHS = {
             "/data/adb/ap/superkey",
             "/data/adb/apd/superkey",
             "/data/adb/ap/package_config",
-            "/data/adb/apd/package_config"
+            "/data/adb/apd/package_config",
+            "/data/adb/ap/bin/apd",
+            "/data/adb/ap/bin/ap"
+    };
+
+    private static final String[] BUSYBOX_PATHS = {
+            "/system/xbin/busybox",
+            "/system/bin/busybox",
+            "/sbin/busybox",
+            "/vendor/bin/busybox",
+            "/data/adb/magisk/busybox",
+            "/data/adb/ksu/bin/busybox",
+            "/data/adb/ap/bin/busybox",
+            "/data/local/busybox",
+            "/data/local/bin/busybox",
+            "/data/local/xbin/busybox"
     };
 
     private static final String[] SYSTEM_SU_PATHS = {
@@ -127,7 +163,63 @@ public final class RootFrameworkDetector {
             "com.kingo.root",
             "com.smedialink.oneclickroot",
             "com.zhiqupk.root.global",
-            "com.alephzain.framaroot"
+            "com.alephzain.framaroot",
+            "com.noshufou.android.su.elite",
+            "com.miui.securitycenter" // MIUI 自带 Root
+    };
+
+    private static final String[] DANGEROUS_APP_PACKAGES = {
+            "com.chelpus.lackypatch",
+            "com.dimonvideo.luckypatcher",
+            "com.forpda.lp",
+            "com.android.vending.billing.InAppBillingService.LUCK",
+            "com.android.vending.billing.InAppBillingService.CLON",
+            "com.android.vending.billing.InAppBillingService.CRACK",
+            "com.android.protips",
+            "com.kingroot.kinguser",
+            "com.kingroot.master",
+            "com.kingstudio.kingroot",
+            "com.mumu.launcher",
+            "com.ami.duosupdater",
+            "com.bluestacks.appmart",
+            "com.bignox.app.store.hd",
+            "com.vphone.launcher",
+            "com.vphone.helper",
+            "com.google.android.launcher.layouts.xposed",
+            "com.android.vending.billing.InAppBillingService.COIN",
+            "com.topjohnwu.magisk",
+            "me.weishu.kernelsu",
+            "org.apatch.manager",
+            "com.koushikdutta.rommanager",
+            "com.koushikdutta.rommanager.license",
+            "com.noshufou.android.su",
+            "com.noshufou.android.su.elite",
+            "eu.chainfire.supersu",
+            "com.zachspong.temprootremovejb",
+            "com.ramdroid.appquarantine",
+            "com.ramdroid.appquarantinepro",
+            "com.android.vending.billing.InAppBillingService.LOCK",
+            "com.allinone.free",
+            "com.repodroid.app",
+            "org.creeplays.creehack",
+            "com.baseapp.eynav",
+            "com.applisto.appcloner",
+            "com.applisto.appcloner.premium",
+            "com.guoshi.httpcanary",
+            "com.guoshi.httpcanary.premium",
+            "com.minvayu.tortoisegit",
+            "org.proxy.core",
+            "com.proxy.vpn",
+            "com.evonode.juggler",
+            "com.vproxymanager",
+            "com.github.metacubex.clash_meta",
+            "com.v2ray.ang",
+            "com.github.kr328.clash",
+            "com.kitsunemask",
+            "org.torproject.android",
+            "com.valvesoftware.android.steam.community",
+            "com.gameguardian.devtools",
+            "catchme.if.you.can"
     };
 
     private static final String[] MAGISK_MAPS_KEYWORDS = {
@@ -192,29 +284,56 @@ public final class RootFrameworkDetector {
             JSONObject kernelsu = probeFramework(
                     ID_KERNELSU, "KernelSU", KERNELSU_PATHS, KERNELSU_PACKAGES, KERNELSU_MAPS_KEYWORDS,
                     KERNELSU_PROP_KEYS, shared, false);
+            JSONObject kernelsuBackup = probeFramework(
+                    ID_KERNELSU_BACKUP, "KernelSU (备选)", KERNELSU_BACKUP_PATHS, new String[0], KERNELSU_MAPS_KEYWORDS,
+                    new String[0], shared, false);
             JSONObject apatch = probeFramework(
                     ID_APATCH, "APatch", APATCH_PATHS, APATCH_PACKAGES, APATCH_MAPS_KEYWORDS,
                     APATCH_PROP_KEYS, shared, false);
+            JSONObject apatchEnhanced = probeFramework(
+                    ID_APATCH_ENHANCED, "APatch (增强型)", APATCH_ENHANCED_PATHS, new String[0], APATCH_MAPS_KEYWORDS,
+                    new String[0], shared, false);
             JSONObject systemSu = probeSystemSu(shared);
+            JSONObject suBinary = probeSuBinary(shared);
+            JSONObject rootManager = probeRootManager(context, shared);
+            JSONObject busybox = probeBusyBox(shared);
+            JSONObject rootHide = probeRootHide(context, shared);
+            JSONObject dangerousApp = probeDangerousApp(context, shared);
+
             applyNativeProbeToFrameworks(magisk, kernelsu, apatch, shared.nativeProbe);
 
             JSONObject frameworks = new JSONObject();
             frameworks.put(ID_MAGISK, magisk);
             frameworks.put(ID_KERNELSU, kernelsu);
+            frameworks.put(ID_KERNELSU_BACKUP, kernelsuBackup);
             frameworks.put(ID_APATCH, apatch);
+            frameworks.put(ID_APATCH_ENHANCED, apatchEnhanced);
             frameworks.put(ID_SYSTEM_SU, systemSu);
+            frameworks.put(ID_SU_BINARY, suBinary);
+            frameworks.put(ID_ROOT_MANAGER, rootManager);
+            frameworks.put(ID_BUSYBOX, busybox);
+            frameworks.put(ID_ROOT_HIDE, rootHide);
+            frameworks.put(ID_DANGEROUS_APP, dangerousApp);
 
             boolean magiskDetected = magisk.optBoolean("detected", false);
-            boolean kernelsuDetected = kernelsu.optBoolean("detected", false);
-            boolean apatchDetected = apatch.optBoolean("detected", false);
-            boolean systemSuDetected = systemSu.optBoolean("detected", false);
-            boolean frameworkConfirmed = magiskDetected || kernelsuDetected || apatchDetected || systemSuDetected;
+            boolean kernelsuDetected = kernelsu.optBoolean("detected", false) || kernelsuBackup.optBoolean("detected", false);
+            boolean apatchDetected = apatch.optBoolean("detected", false) || apatchEnhanced.optBoolean("detected", false);
+            boolean systemSuDetected = systemSu.optBoolean("detected", false) || suBinary.optBoolean("detected", false);
+            boolean frameworkConfirmed = magiskDetected || kernelsuDetected || apatchDetected || systemSuDetected
+                    || rootManager.optBoolean("detected", false);
             boolean hideSuspected = shared.hideSuspected && !frameworkConfirmed;
 
             mergeReasons(combinedReasons, magisk.optJSONArray("reasons"));
             mergeReasons(combinedReasons, kernelsu.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, kernelsuBackup.optJSONArray("reasons"));
             mergeReasons(combinedReasons, apatch.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, apatchEnhanced.optJSONArray("reasons"));
             mergeReasons(combinedReasons, systemSu.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, suBinary.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, rootManager.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, busybox.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, rootHide.optJSONArray("reasons"));
+            mergeReasons(combinedReasons, dangerousApp.optJSONArray("reasons"));
             if (hideSuspected) {
                 combinedReasons.put(buildHideSuspectedReason(shared));
             }
@@ -231,13 +350,22 @@ public final class RootFrameworkDetector {
             sharedIndicators.put("javaNativeMismatches", shared.javaNativeMismatches);
             sharedIndicators.put("envHits", shared.envHits);
             sharedIndicators.put("hideSuspected", hideSuspected);
+            sharedIndicators.put("persieAligned", shared.persieAligned);
 
             result.put("detected", frameworkConfirmed || hideSuspected);
+            result.put("persieAligned", shared.persieAligned);
             result.put("frameworkConfirmed", frameworkConfirmed);
             result.put("magiskDetected", magiskDetected);
             result.put("kernelsuDetected", kernelsuDetected);
+            result.put("kernelsuBackupDetected", kernelsuBackup.optBoolean("detected", false));
             result.put("apatchDetected", apatchDetected);
+            result.put("apatchEnhancedDetected", apatchEnhanced.optBoolean("detected", false));
             result.put("systemSuDetected", systemSuDetected);
+            result.put("suBinaryFound", suBinary.optBoolean("detected", false));
+            result.put("rootManagerDetected", rootManager.optBoolean("detected", false));
+            result.put("busyboxDetected", busybox.optBoolean("detected", false));
+            result.put("rootHideDetected", rootHide.optBoolean("detected", false));
+            result.put("dangerousAppDetected", dangerousApp.optBoolean("detected", false));
             result.put("hideSuspected", hideSuspected);
             result.put("frameworks", frameworks);
             result.put("sharedIndicators", sharedIndicators);
@@ -328,6 +456,116 @@ public final class RootFrameworkDetector {
         return result;
     }
 
+    private static JSONObject probeSuBinary(SharedContext shared) throws JSONException {
+        JSONObject result = new JSONObject();
+        JSONArray reasons = new JSONArray();
+        JSONObject indicators = new JSONObject();
+
+        JSONArray matchedPaths = scanExistingPaths(SYSTEM_SU_PATHS);
+        boolean suWhichHit = !shared.suWhichPath.isEmpty() && !shared.suWhichPath.contains("not found");
+
+        indicators.put("matchedPaths", matchedPaths);
+        indicators.put("suWhichPath", shared.suWhichPath);
+
+        appendPathReasons(reasons, "SU 可执行文件", matchedPaths);
+        if (suWhichHit) {
+            reasons.put("which su 探测到: " + shared.suWhichPath);
+        }
+
+        result.put("id", ID_SU_BINARY);
+        result.put("displayName", "找到 SU 可执行文件");
+        result.put("detected", matchedPaths.length() > 0 || suWhichHit);
+        result.put("indicators", indicators);
+        result.put("reasons", reasons);
+        return result;
+    }
+
+    private static JSONObject probeRootManager(Context context, SharedContext shared) throws JSONException {
+        JSONObject result = new JSONObject();
+        JSONArray reasons = new JSONArray();
+        JSONObject indicators = new JSONObject();
+
+        String[] managerPackages = concatAll(MAGISK_PACKAGES, KERNELSU_PACKAGES, APATCH_PACKAGES, SYSTEM_SU_PACKAGES);
+        JSONArray packageHits = filterPackages(shared.installedPackages, managerPackages);
+
+        indicators.put("packageHits", packageHits);
+        appendArrayReasons(reasons, packageHits, "Root 管理器应用");
+
+        result.put("id", ID_ROOT_MANAGER);
+        result.put("displayName", "Root 管理器应用 / 分支");
+        result.put("detected", packageHits.length() > 0);
+        result.put("indicators", indicators);
+        result.put("reasons", reasons);
+        return result;
+    }
+
+    private static JSONObject probeBusyBox(SharedContext shared) throws JSONException {
+        JSONObject result = new JSONObject();
+        JSONArray reasons = new JSONArray();
+        JSONObject indicators = new JSONObject();
+
+        JSONArray matchedPaths = scanExistingPaths(BUSYBOX_PATHS);
+        String whichBusybox = normalize(Cmd.exe("which busybox 2>/dev/null"));
+        boolean busyboxHit = !whichBusybox.isEmpty() && !whichBusybox.contains("not found");
+
+        indicators.put("matchedPaths", matchedPaths);
+        indicators.put("whichBusybox", whichBusybox);
+
+        appendPathReasons(reasons, "BusyBox", matchedPaths);
+        if (busyboxHit) {
+            reasons.put("which busybox 探测到: " + whichBusybox);
+        }
+
+        result.put("id", ID_BUSYBOX);
+        result.put("displayName", "BusyBox 二进制文件");
+        result.put("detected", matchedPaths.length() > 0 || busyboxHit);
+        result.put("indicators", indicators);
+        result.put("reasons", reasons);
+        return result;
+    }
+
+    private static JSONObject probeRootHide(Context context, SharedContext shared) throws JSONException {
+        JSONObject result = new JSONObject();
+        JSONArray reasons = new JSONArray();
+        JSONObject indicators = new JSONObject();
+
+        JSONArray cloakingHits = filterPackages(shared.installedPackages, PersieAlignedRootProbe.ROOT_CLOAKING_PACKAGES);
+        boolean hideSuspected = shared.hideSuspected;
+
+        indicators.put("cloakingPackageHits", cloakingHits);
+        indicators.put("hideSuspected", hideSuspected);
+
+        appendArrayReasons(reasons, cloakingHits, "Root 隐藏应用");
+        if (hideSuspected) {
+            reasons.put(buildHideSuspectedReason(shared));
+        }
+
+        result.put("id", ID_ROOT_HIDE);
+        result.put("displayName", "Root 隐藏应用");
+        result.put("detected", cloakingHits.length() > 0 || hideSuspected);
+        result.put("indicators", indicators);
+        result.put("reasons", reasons);
+        return result;
+    }
+
+    private static JSONObject probeDangerousApp(Context context, SharedContext shared) throws JSONException {
+        JSONObject result = new JSONObject();
+        JSONArray reasons = new JSONArray();
+        JSONObject indicators = new JSONObject();
+
+        JSONArray packageHits = filterPackages(shared.installedPackages, DANGEROUS_APP_PACKAGES);
+
+        indicators.put("packageHits", packageHits);
+        appendArrayReasons(reasons, packageHits, "危险应用 / 修改工具");
+
+        result.put("id", ID_DANGEROUS_APP);
+        result.put("displayName", "危险应用 / 修改工具");
+        result.put("detected", packageHits.length() > 0);
+        result.put("indicators", indicators);
+        result.put("reasons", reasons);
+        return result;
+    }
+
     private static JSONObject probeSystemSu(SharedContext shared) throws JSONException {
         JSONObject result = new JSONObject();
         JSONArray reasons = new JSONArray();
@@ -393,6 +631,7 @@ public final class RootFrameworkDetector {
         JSONArray javaNativeMismatches = new JSONArray();
         JSONArray installedPackages = new JSONArray();
         JSONObject nativeProbe = new JSONObject();
+        JSONObject persieAligned = new JSONObject();
         String allProps = "";
         String selinuxMode = "";
         String suReadlink = "";
@@ -412,6 +651,7 @@ public final class RootFrameworkDetector {
             ctx.buildMismatches = collectBuildMismatches();
             ctx.envHits = scanEnvironmentVariables();
             ctx.nativeProbe = parseNativeProbe();
+            ctx.persieAligned = PersieAlignedRootProbe.probe(context);
             ctx.selinuxMode = normalize(Cmd.exe("getenforce"));
             ctx.suReadlink = normalize(Cmd.exe("readlink /system/bin/su 2>/dev/null"));
             ctx.suWhichPath = normalize(Cmd.exe("which su 2>/dev/null"));
@@ -432,8 +672,10 @@ public final class RootFrameworkDetector {
             boolean javaMapsRootHit = ctx.mapsHits.length() > 0 || ctx.mountInfoHits.length() > 0
                     || ctx.mountHits.length() > 0;
             boolean nativeRootHit = hasNativeRootEvidence(ctx.nativeProbe);
+            boolean persieHideSignal = PersieAlignedRootProbe.hasHideRelevantSignal(ctx.persieAligned);
             boolean pathVisible = allPaths.length() > 0;
-            ctx.hideSuspected = (javaMapsRootHit || nativeRootHit || ctx.javaNativeMismatches.length() > 0)
+            ctx.hideSuspected = (javaMapsRootHit || nativeRootHit || ctx.javaNativeMismatches.length() > 0
+                    || persieHideSignal)
                     && !pathVisible && !RootAccessHelper.isRootGranted();
             return ctx;
         }

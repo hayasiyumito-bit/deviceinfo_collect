@@ -89,8 +89,15 @@ public final class SecurityReportComposer {
         boolean isRooted = rootSection.optBoolean("isRooted", false);
         boolean magiskDetected = rootSection.optBoolean("magiskDetected", false);
         boolean kernelsuDetected = rootSection.optBoolean("kernelsuDetected", false);
+        boolean kernelsuBackupDetected = rootSection.optBoolean("kernelsuBackupDetected", false);
         boolean apatchDetected = rootSection.optBoolean("apatchDetected", false);
+        boolean apatchEnhancedDetected = rootSection.optBoolean("apatchEnhancedDetected", false);
         boolean systemSuDetected = rootSection.optBoolean("systemSuDetected", false);
+        boolean suBinaryFound = rootSection.optBoolean("suBinaryFound", false);
+        boolean rootManagerDetected = rootSection.optBoolean("rootManagerDetected", false);
+        boolean busyboxDetected = rootSection.optBoolean("busyboxDetected", false);
+        boolean rootHideDetected = rootSection.optBoolean("rootHideDetected", false);
+        boolean dangerousAppDetected = rootSection.optBoolean("dangerousAppDetected", false);
         boolean magiskHideSuspected = rootSection.optBoolean("magiskHideSuspected", false);
         boolean bootloaderUnlocked = isBootloaderUnlocked(rootSection);
         boolean rootAccessGranted = rootSection.optBoolean("accessGranted", false);
@@ -105,8 +112,15 @@ public final class SecurityReportComposer {
         summary.put("isRooted", isRooted);
         summary.put("magiskDetected", magiskDetected);
         summary.put("kernelsuDetected", kernelsuDetected);
+        summary.put("kernelsuBackupDetected", kernelsuBackupDetected);
         summary.put("apatchDetected", apatchDetected);
+        summary.put("apatchEnhancedDetected", apatchEnhancedDetected);
         summary.put("systemSuDetected", systemSuDetected);
+        summary.put("suBinaryFound", suBinaryFound);
+        summary.put("rootManagerDetected", rootManagerDetected);
+        summary.put("busyboxDetected", busyboxDetected);
+        summary.put("rootHideDetected", rootHideDetected);
+        summary.put("dangerousAppDetected", dangerousAppDetected);
         summary.put("magiskHideSuspected", magiskHideSuspected);
         summary.put("bootloaderUnlocked", bootloaderUnlocked);
         summary.put("rootAccessGranted", rootAccessGranted);
@@ -117,14 +131,23 @@ public final class SecurityReportComposer {
         summary.put("isAdbEnabled", isAdbEnabled);
         summary.put("anyHookSignal", hookFrameworkDetected || propertyTampered);
         summary.put("anyRootSignal", isRooted || rootAccessGranted || magiskDetected
-                || kernelsuDetected || apatchDetected || systemSuDetected || magiskHideSuspected);
+                || kernelsuDetected || kernelsuBackupDetected || apatchDetected || apatchEnhancedDetected
+                || systemSuDetected || suBinaryFound || rootManagerDetected || busyboxDetected
+                || rootHideDetected || dangerousAppDetected || magiskHideSuspected);
         summary.put("anyRisk", hookFrameworkDetected
                 || propertyTampered
                 || isRooted
                 || magiskDetected
                 || kernelsuDetected
+                || kernelsuBackupDetected
                 || apatchDetected
+                || apatchEnhancedDetected
                 || systemSuDetected
+                || suBinaryFound
+                || rootManagerDetected
+                || busyboxDetected
+                || rootHideDetected
+                || dangerousAppDetected
                 || magiskHideSuspected
                 || rootAccessGranted
                 || isEmulator
@@ -157,8 +180,15 @@ public final class SecurityReportComposer {
         appendReasonsIf(summary, reasons, unique, "isRooted", "rootAccessGranted", "root");
         appendReasonsIf(summary, reasons, unique, "magiskDetected", "magiskHideSuspected", "root");
         appendReasonsIf(summary, reasons, unique, "kernelsuDetected", "kernelsuDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "kernelsuBackupDetected", "root");
         appendReasonsIf(summary, reasons, unique, "apatchDetected", "apatchDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "apatchEnhancedDetected", "root");
         appendReasonsIf(summary, reasons, unique, "systemSuDetected", "rootAccessGranted", "root");
+        appendReasonsIf(summary, reasons, unique, "suBinaryFound", "root");
+        appendReasonsIf(summary, reasons, unique, "rootManagerDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "busyboxDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "rootHideDetected", "root");
+        appendReasonsIf(summary, reasons, unique, "dangerousAppDetected", "root");
         if (summary.optBoolean("isEmulator", false)
                 || summary.optBoolean("isVpn", false)
                 || summary.optBoolean("isDebug", false)) {
