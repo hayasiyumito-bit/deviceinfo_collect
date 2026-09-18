@@ -24,7 +24,7 @@ public final class RootAccessHelper {
     private static final AtomicBoolean attemptStarted = new AtomicBoolean(false);
     private static final AtomicBoolean attemptFinished = new AtomicBoolean(false);
     private static final AtomicBoolean rootGranted = new AtomicBoolean(false);
-    private static final AtomicReference<String> attemptDetail = new AtomicReference<>("未尝试");
+    private static final AtomicReference<String> attemptDetail = new AtomicReference<>(com.android.device.i18n.AppLocale.tr("未尝试", "Not attempted"));
     private static final AtomicLong attemptSequence = new AtomicLong(0L);
 
     private static volatile CountDownLatch attemptLatch = new CountDownLatch(0);
@@ -39,7 +39,7 @@ public final class RootAccessHelper {
             attemptStarted.set(false);
             attemptFinished.set(false);
             rootGranted.set(false);
-            attemptDetail.set("尝试 su 中…");
+            attemptDetail.set(com.android.device.i18n.AppLocale.tr("尝试 su 中…", "Trying su…"));
             attemptLatch = new CountDownLatch(1);
         }
         startAttemptAsync();
@@ -85,20 +85,20 @@ public final class RootAccessHelper {
     private static void runAttempt() {
         try {
             if (trySuOneShot("su -c id")) {
-                markGranted("su -c id 成功");
+                markGranted(com.android.device.i18n.AppLocale.tr("su -c id 成功", "su -c id succeeded"));
                 return;
             }
             if (trySuOneShot("su 0 id")) {
-                markGranted("su 0 id 成功");
+                markGranted(com.android.device.i18n.AppLocale.tr("su 0 id 成功", "su 0 id succeeded"));
                 return;
             }
             if (trySuInteractive()) {
-                markGranted("su 交互式 id 成功");
+                markGranted(com.android.device.i18n.AppLocale.tr("su 交互式 id 成功", "su interactive id succeeded"));
                 return;
             }
-            markDenied("未获取 Root（su 不可用或已拒绝）");
+            markDenied(com.android.device.i18n.AppLocale.tr("未获取 Root（su 不可用或已拒绝）", "Root not obtained (su unavailable or denied)"));
         } catch (Throwable t) {
-            markDenied("未获取 Root");
+            markDenied(com.android.device.i18n.AppLocale.tr("未获取 Root", "Root not obtained"));
             Log.d(TAG, "Root probe skipped: " + t.getMessage());
         }
     }

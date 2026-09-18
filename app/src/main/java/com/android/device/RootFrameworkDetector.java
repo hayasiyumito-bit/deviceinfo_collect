@@ -495,13 +495,13 @@ public final class RootFrameworkDetector {
                     ID_KERNELSU, "KernelSU", KERNELSU_PATHS, KERNELSU_PACKAGES, KERNELSU_MAPS_KEYWORDS,
                     KERNELSU_PROP_KEYS, shared, false);
             JSONObject kernelsuBackup = probeFramework(
-                    ID_KERNELSU_BACKUP, "KernelSU (备选)", KERNELSU_BACKUP_PATHS, new String[0], KERNELSU_MAPS_KEYWORDS,
+                    ID_KERNELSU_BACKUP, com.android.device.i18n.AppLocale.tr("KernelSU (备选)", "KernelSU (fallback)"), KERNELSU_BACKUP_PATHS, new String[0], KERNELSU_MAPS_KEYWORDS,
                     new String[0], shared, false);
             JSONObject apatch = probeFramework(
                     ID_APATCH, "APatch", APATCH_PATHS, APATCH_PACKAGES, APATCH_MAPS_KEYWORDS,
                     APATCH_PROP_KEYS, shared, false);
             JSONObject apatchEnhanced = probeFramework(
-                    ID_APATCH_ENHANCED, "APatch (增强型)", APATCH_ENHANCED_PATHS, new String[0], APATCH_MAPS_KEYWORDS,
+                    ID_APATCH_ENHANCED, com.android.device.i18n.AppLocale.tr("APatch (增强型)", "APatch (enhanced)"), APATCH_ENHANCED_PATHS, new String[0], APATCH_MAPS_KEYWORDS,
                     new String[0], shared, false);
             JSONObject systemSu = probeSystemSu(shared);
             JSONObject suBinary = probeSuBinary(shared);
@@ -654,21 +654,21 @@ public final class RootFrameworkDetector {
 
         appendPathReasons(reasons, displayName, matchedPaths);
         appendShellPathReasons(reasons, shellPaths);
-        appendArrayReasons(reasons, packageHits, displayName + " 安装包");
-        appendArrayReasons(reasons, mapsHits, displayName + " maps 命中");
-        appendArrayReasons(reasons, mountHits, displayName + " mounts 命中");
-        appendArrayReasons(reasons, mountInfoHits, displayName + " mountinfo 命中");
-        appendArrayReasons(reasons, propHits, displayName + " 属性");
+        appendArrayReasons(reasons, packageHits, displayName + com.android.device.i18n.AppLocale.tr(" 安装包", " package"));
+        appendArrayReasons(reasons, mapsHits, displayName + com.android.device.i18n.AppLocale.tr(" maps 命中", " maps hit"));
+        appendArrayReasons(reasons, mountHits, displayName + com.android.device.i18n.AppLocale.tr(" mounts 命中", " mounts hit"));
+        appendArrayReasons(reasons, mountInfoHits, displayName + com.android.device.i18n.AppLocale.tr(" mountinfo 命中", " mountinfo hit"));
+        appendArrayReasons(reasons, propHits, displayName + com.android.device.i18n.AppLocale.tr(" 属性", " property"));
         appendArrayReasons(reasons, shellHits, displayName + " Shell");
-        appendArrayReasons(reasons, envHits, displayName + " 环境变量");
+        appendArrayReasons(reasons, envHits, displayName + com.android.device.i18n.AppLocale.tr(" 环境变量", " env var"));
         if (suLinked) {
-            reasons.put("su 链接到 Magisk: " + shared.suReadlink);
+            reasons.put(com.android.device.i18n.AppLocale.tr("su 链接到 Magisk: ", "su links to Magisk: ") + shared.suReadlink);
         }
         if (suLinkedKsu) {
-            reasons.put("su 链接到 KernelSU: " + shared.suReadlink);
+            reasons.put(com.android.device.i18n.AppLocale.tr("su 链接到 KernelSU: ", "su links to KernelSU: ") + shared.suReadlink);
         }
         if (suLinkedApd) {
-            reasons.put("su 链接到 APatch: " + shared.suReadlink);
+            reasons.put(com.android.device.i18n.AppLocale.tr("su 链接到 APatch: ", "su links to APatch: ") + shared.suReadlink);
         }
 
         boolean detected = pathHit || packageHit || mapsHit || mountHit || propHit || shellHit
@@ -708,15 +708,15 @@ public final class RootFrameworkDetector {
         indicators.put("allMatchedPaths", matchedPaths);
         indicators.put("suWhichPath", shared.suWhichPath);
 
-        appendPathReasons(reasons, "SU 可执行文件", filteredPaths);
+        appendPathReasons(reasons, com.android.device.i18n.AppLocale.tr("SU 可执行文件", "SU binary"), filteredPaths);
         appendShellPathReasons(reasons, filteredShellPaths);
         if (suWhichHit) {
-            reasons.put("which su 探测到: " + shared.suWhichPath);
+            reasons.put(com.android.device.i18n.AppLocale.tr("which su 探测到: ", "which su found: ") + shared.suWhichPath);
         }
 
         boolean detected = filteredPaths.length() > 0 || filteredShellPaths.length() > 0 || suWhichHit;
         result.put("id", ID_SU_BINARY);
-        result.put("displayName", "找到 SU 可执行文件");
+        result.put("displayName", com.android.device.i18n.AppLocale.tr("找到 SU 可执行文件", "SU binary found"));
         result.put("detected", detected);
         result.put("indicators", indicators);
         result.put("reasons", reasons);
@@ -750,10 +750,10 @@ public final class RootFrameworkDetector {
         JSONArray packageHits = filterPackages(shared.installedPackages, managerPackages);
 
         indicators.put("packageHits", packageHits);
-        appendArrayReasons(reasons, packageHits, "Root 管理器应用");
+        appendArrayReasons(reasons, packageHits, com.android.device.i18n.AppLocale.tr("Root 管理器应用", "Root manager app"));
 
         result.put("id", ID_ROOT_MANAGER);
-        result.put("displayName", "Root 管理器应用 / 分支");
+        result.put("displayName", com.android.device.i18n.AppLocale.tr("Root 管理器应用 / 分支", "Root manager app / variant"));
         result.put("detected", packageHits.length() > 0);
         result.put("indicators", indicators);
         result.put("reasons", reasons);
@@ -777,11 +777,11 @@ public final class RootFrameworkDetector {
         appendPathReasons(reasons, "BusyBox", matchedPaths);
         appendShellPathReasons(reasons, shellPaths);
         if (busyboxHit) {
-            reasons.put("which busybox 探测到: " + whichBusybox);
+            reasons.put(com.android.device.i18n.AppLocale.tr("which busybox 探测到: ", "which busybox found: ") + whichBusybox);
         }
 
         result.put("id", ID_BUSYBOX);
-        result.put("displayName", "BusyBox 二进制文件");
+        result.put("displayName", com.android.device.i18n.AppLocale.tr("BusyBox 二进制文件", "BusyBox binary"));
         result.put("detected", matchedPaths.length() > 0 || shellPaths.length() > 0 || busyboxHit);
         result.put("indicators", indicators);
         result.put("reasons", reasons);
@@ -799,13 +799,13 @@ public final class RootFrameworkDetector {
         indicators.put("cloakingPackageHits", cloakingHits);
         indicators.put("hideSuspected", hideSuspected);
 
-        appendArrayReasons(reasons, cloakingHits, "Root 隐藏应用");
+        appendArrayReasons(reasons, cloakingHits, com.android.device.i18n.AppLocale.tr("Root 隐藏应用", "Root-hiding app"));
         if (hideSuspected) {
             reasons.put(buildHideSuspectedReason(shared));
         }
 
         result.put("id", ID_ROOT_HIDE);
-        result.put("displayName", "Root 隐藏应用");
+        result.put("displayName", com.android.device.i18n.AppLocale.tr("Root 隐藏应用", "Root-hiding app"));
         result.put("detected", cloakingHits.length() > 0 || hideSuspected);
         result.put("indicators", indicators);
         result.put("reasons", reasons);
@@ -820,10 +820,10 @@ public final class RootFrameworkDetector {
         JSONArray packageHits = filterPackages(shared.installedPackages, DANGEROUS_APP_PACKAGES);
 
         indicators.put("packageHits", packageHits);
-        appendArrayReasons(reasons, packageHits, "危险应用 / 修改工具");
+        appendArrayReasons(reasons, packageHits, com.android.device.i18n.AppLocale.tr("危险应用 / 修改工具", "Dangerous app / modding tool"));
 
         result.put("id", ID_DANGEROUS_APP);
-        result.put("displayName", "危险应用 / 修改工具");
+        result.put("displayName", com.android.device.i18n.AppLocale.tr("危险应用 / 修改工具", "Dangerous app / modding tool"));
         result.put("detected", packageHits.length() > 0);
         result.put("indicators", indicators);
         result.put("reasons", reasons);
@@ -857,28 +857,28 @@ public final class RootFrameworkDetector {
         indicators.put("accessGranted", suGranted);
         indicators.put("accessDetail", RootAccessHelper.getAttemptDetail());
 
-        appendPathReasons(reasons, "系统 su", matchedPaths);
-        appendArrayReasons(reasons, packageHits, "系统 Root 管理器");
-        appendArrayReasons(reasons, mapsHits, "系统 su maps 命中");
-        appendArrayReasons(reasons, shellHits, "系统 su Shell");
+        appendPathReasons(reasons, com.android.device.i18n.AppLocale.tr("系统 su", "System su"), matchedPaths);
+        appendArrayReasons(reasons, packageHits, com.android.device.i18n.AppLocale.tr("系统 Root 管理器", "System root manager"));
+        appendArrayReasons(reasons, mapsHits, com.android.device.i18n.AppLocale.tr("系统 su maps 命中", "System su maps hit"));
+        appendArrayReasons(reasons, shellHits, com.android.device.i18n.AppLocale.tr("系统 su Shell", "System su Shell"));
         if (suWhichHit) {
-            reasons.put("which su 可用: " + shared.suWhichPath);
+            reasons.put(com.android.device.i18n.AppLocale.tr("which su 可用: ", "which su available: ") + shared.suWhichPath);
         }
         if (!shared.suReadlink.isEmpty() && !suLinkedFramework) {
-            reasons.put("su 符号链接: " + shared.suReadlink);
+            reasons.put(com.android.device.i18n.AppLocale.tr("su 符号链接: ", "su symlink: ") + shared.suReadlink);
         }
         if (suGranted) {
-            reasons.put("su 授权探测成功: " + RootAccessHelper.getAttemptDetail());
+            reasons.put(com.android.device.i18n.AppLocale.tr("su 授权探测成功: ", "su grant probe succeeded: ") + RootAccessHelper.getAttemptDetail());
         }
         if (idShowsRoot) {
-            reasons.put("id 显示 root: " + shared.idOutput);
+            reasons.put(com.android.device.i18n.AppLocale.tr("id 显示 root: ", "id shows root: ") + shared.idOutput);
         }
 
         boolean detected = matchedPaths.length() > 0 || packageHits.length() > 0 || mapsHits.length() > 0
                 || shellHits.length() > 0 || suWhichHit || suGranted || idShowsRoot;
 
         result.put("id", ID_SYSTEM_SU);
-        result.put("displayName", "系统 su");
+        result.put("displayName", com.android.device.i18n.AppLocale.tr("系统 su", "System su"));
         result.put("detected", detected);
         result.put("indicators", indicators);
         result.put("reasons", reasons);
@@ -947,12 +947,12 @@ public final class RootFrameworkDetector {
 
     private static String buildHideSuspectedReason(SharedContext shared) {
         if (shared.javaNativeMismatches.length() > 0) {
-            return "疑似 Root 隐藏：Native 路径可访问但 Java 层不可见";
+            return com.android.device.i18n.AppLocale.tr("疑似 Root 隐藏：Native 路径可访问但 Java 层不可见", "Suspected root hiding: Native paths accessible but invisible to the Java layer");
         }
         if (shared.nativeProbe.optBoolean("anyHit", false)) {
-            return "疑似 Root 隐藏：Native maps/mount 有 Root 框架信号但路径被隐藏";
+            return com.android.device.i18n.AppLocale.tr("疑似 Root 隐藏：Native maps/mount 有 Root 框架信号但路径被隐藏", "Suspected root hiding: Native maps/mount show root-framework signals but paths are hidden");
         }
-        return "疑似 Root 隐藏：maps/mount 有 Root 框架信号但路径不可见";
+        return com.android.device.i18n.AppLocale.tr("疑似 Root 隐藏：maps/mount 有 Root 框架信号但路径不可见", "Suspected root hiding: maps/mount show root-framework signals but paths invisible");
     }
 
     private static void applyNativeProbeToFrameworks(
@@ -962,25 +962,25 @@ public final class RootFrameworkDetector {
             JSONObject nativeProbe
     ) throws JSONException {
         if (nativeIndicatesFramework(nativeProbe, "magisk", "zygisk", "magiskpolicy", "resetprop")) {
-            markFrameworkDetectedByNative(magisk, "Native 探测命中 Magisk/Zygisk");
+            markFrameworkDetectedByNative(magisk, com.android.device.i18n.AppLocale.tr("Native 探测命中 Magisk/Zygisk", "Native probe hit Magisk/Zygisk"));
         }
         if (nativeIndicatesFramework(nativeProbe, "kernelsu", "ksud", "kernel_su")
                 || containsExactHit(nativeProbe.optJSONArray("mapsHits"))) {
-            markFrameworkDetectedByNative(kernelsu, "Native 探测命中 KernelSU");
+            markFrameworkDetectedByNative(kernelsu, com.android.device.i18n.AppLocale.tr("Native 探测命中 KernelSU", "Native probe hit KernelSU"));
         }
         if (nativeIndicatesFramework(nativeProbe, "apatch", "bmax")) {
-            markFrameworkDetectedByNative(apatch, "Native 探测命中 APatch");
+            markFrameworkDetectedByNative(apatch, com.android.device.i18n.AppLocale.tr("Native 探测命中 APatch", "Native probe hit APatch"));
         }
         JSONArray accessible = nativeProbe.optJSONArray("accessiblePaths");
         if (accessible != null) {
             for (int i = 0; i < accessible.length(); i++) {
                 String path = accessible.optString(i).toLowerCase(Locale.US);
                 if (path.contains("magisk")) {
-                    markFrameworkDetectedByNative(magisk, "Native 路径可访问: " + accessible.optString(i));
+                    markFrameworkDetectedByNative(magisk, com.android.device.i18n.AppLocale.tr("Native 路径可访问: ", "Native path accessible: ") + accessible.optString(i));
                 } else if (path.contains("ksu") || path.contains("kernelsu")) {
-                    markFrameworkDetectedByNative(kernelsu, "Native 路径可访问: " + accessible.optString(i));
+                    markFrameworkDetectedByNative(kernelsu, com.android.device.i18n.AppLocale.tr("Native 路径可访问: ", "Native path accessible: ") + accessible.optString(i));
                 } else if (path.contains("/ap") || path.contains("apd")) {
-                    markFrameworkDetectedByNative(apatch, "Native 路径可访问: " + accessible.optString(i));
+                    markFrameworkDetectedByNative(apatch, com.android.device.i18n.AppLocale.tr("Native 路径可访问: ", "Native path accessible: ") + accessible.optString(i));
                 }
             }
         }
@@ -1382,7 +1382,7 @@ public final class RootFrameworkDetector {
             boolean javaVisible = new File(path).exists();
             boolean listedByJavaScan = containsString(javaPaths, path);
             if (!javaVisible || !listedByJavaScan) {
-                mismatches.put(path + " (native可访问, Java=" + javaVisible + ")");
+                mismatches.put(path + com.android.device.i18n.AppLocale.tr(" (native可访问, Java=", " (native accessible, Java=") + javaVisible + ")");
             }
         }
         return mismatches;
@@ -1400,7 +1400,7 @@ public final class RootFrameworkDetector {
             String jni = normalize(JniPropertyHelper.getSystemPropertyByFind(key));
             if (!shell.isEmpty() && !jni.isEmpty() && !JniPropertyHelper.isErrorResult(jni)
                     && !shell.equals(jni)) {
-                hits.put(key + " 通道不一致: getprop=" + shell + " jni=" + jni);
+                hits.put(key + com.android.device.i18n.AppLocale.tr(" 通道不一致: getprop=", " channel mismatch: getprop=") + shell + " jni=" + jni);
             }
         }
         return hits;
@@ -1466,7 +1466,7 @@ public final class RootFrameworkDetector {
     private static void appendPathReasons(JSONArray reasons, String label, JSONArray paths)
             throws JSONException {
         for (int i = 0; i < paths.length(); i++) {
-            reasons.put(label + " 路径存在: " + paths.optString(i));
+            reasons.put(label + com.android.device.i18n.AppLocale.tr(" 路径存在: ", " path exists: ") + paths.optString(i));
         }
     }
 

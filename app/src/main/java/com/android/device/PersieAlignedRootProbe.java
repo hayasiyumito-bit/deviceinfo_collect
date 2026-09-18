@@ -192,13 +192,13 @@ public final class PersieAlignedRootProbe {
             putArray(indicators, "extraMagiskMountPaths", extraMountPaths);
             putArray(indicators, "rootCloakingPackages", cloakingPackages);
 
-            appendAll(reasons, dfHits, "df 命中: ");
-            appendAll(reasons, psHits, "ps 命中: ");
+            appendAll(reasons, dfHits, com.android.device.i18n.AppLocale.tr("df 命中: ", "df hit: "));
+            appendAll(reasons, psHits, com.android.device.i18n.AppLocale.tr("ps 命中: ", "ps hit: "));
             appendAll(reasons, unixHits, "unix socket: ");
-            appendAll(reasons, mountRegexHits, "挂载正则: ");
-            appendAll(reasons, zygiskPaths, "Zygisk 模块路径: ");
-            appendAll(reasons, extraMountPaths, "Magisk 挂载路径: ");
-            appendAll(reasons, cloakingPackages, "Root 隐藏类 App: ");
+            appendAll(reasons, mountRegexHits, com.android.device.i18n.AppLocale.tr("挂载正则: ", "Mount regex: "));
+            appendAll(reasons, zygiskPaths, com.android.device.i18n.AppLocale.tr("Zygisk 模块路径: ", "Zygisk module path: "));
+            appendAll(reasons, extraMountPaths, com.android.device.i18n.AppLocale.tr("Magisk 挂载路径: ", "Magisk mount path: "));
+            appendAll(reasons, cloakingPackages, com.android.device.i18n.AppLocale.tr("Root 隐藏类 App: ", "Root-hiding app: "));
 
             boolean detected = reasons.length() > 0;
             result.put("detected", detected);
@@ -257,7 +257,7 @@ public final class PersieAlignedRootProbe {
         }
         String lower = ps.toLowerCase(Locale.US);
         if (lower.contains("magiskd") || lower.contains("zygisk") || lower.contains("ksud")) {
-            hits.put("进程列表含 magiskd/zygisk/ksud");
+            hits.put(com.android.device.i18n.AppLocale.tr("进程列表含 magiskd/zygisk/ksud", "Process list contains magiskd/zygisk/ksud"));
         }
         return hits;
     }
@@ -271,7 +271,7 @@ public final class PersieAlignedRootProbe {
         String lower = content.toLowerCase(Locale.US);
         for (String marker : UNIX_SOCKET_MARKERS) {
             if (lower.contains(marker.toLowerCase(Locale.US))) {
-                hits.put("/proc/net/unix 含 " + marker);
+                hits.put(com.android.device.i18n.AppLocale.tr("/proc/net/unix 含 ", "/proc/net/unix contains ") + marker);
             }
         }
         return hits;

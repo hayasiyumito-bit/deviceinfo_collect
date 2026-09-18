@@ -83,7 +83,7 @@ public final class HideDetectionProbe {
             if (tempArtifacts.length() > 0) {
                 detected = true;
                 for (int i = 0; i < tempArtifacts.length(); i++) {
-                    reasons.put("proc 过滤临时文件残留: " + tempArtifacts.optString(i));
+                    reasons.put(com.android.device.i18n.AppLocale.tr("proc 过滤临时文件残留: ", "proc-filter temp-file residue: ") + tempArtifacts.optString(i));
                 }
             }
 
@@ -114,22 +114,22 @@ public final class HideDetectionProbe {
             probe.put("raw", raw != null ? raw : "");
         }
         if (probe.optBoolean("mapsRedirected", false)) {
-            reasons.put("/proc/self/maps 被重定向到伪造文件: " + probe.optString("mapsFdTarget", ""));
+            reasons.put(com.android.device.i18n.AppLocale.tr("/proc/self/maps 被重定向到伪造文件: ", "/proc/self/maps redirected to a fake file: ") + probe.optString("mapsFdTarget", ""));
         }
         if (probe.optBoolean("mapsFdOffProcFs", false)) {
-            reasons.put("/proc/self/maps 句柄不在 procfs 上（st_dev 不一致），疑似临时文件重定向");
+            reasons.put(com.android.device.i18n.AppLocale.tr("/proc/self/maps 句柄不在 procfs 上（st_dev 不一致），疑似临时文件重定向", "/proc/self/maps handle not on procfs (st_dev mismatch), suspected temp-file redirection"));
         }
         if (probe.optBoolean("statSizeAnomaly", false)) {
-            reasons.put("/proc/self/maps stat 大小非 0（真实 procfs 恒为 0），疑似 stat 被篡改: "
+            reasons.put(com.android.device.i18n.AppLocale.tr("/proc/self/maps stat 大小非 0（真实 procfs 恒为 0），疑似 stat 被篡改: ", "/proc/self/maps stat size non-zero (real procfs is always 0), suspected stat tampering: ")
                     + probe.optLong("statSize", -1));
         }
         if (probe.optBoolean("readlinkHookDetected", false)) {
-            reasons.put("readlink 被 Hook：libc 与原始 syscall 结果不一致（libc="
+            reasons.put(com.android.device.i18n.AppLocale.tr("readlink 被 Hook：libc 与原始 syscall 结果不一致（libc=", "readlink hooked: libc vs raw syscall result mismatch (libc=")
                     + probe.optString("mapsFdTarget", "") + " raw="
                     + probe.optString("rawFdTarget", "") + "）");
         }
         if (probe.optBoolean("fstatHookDetected", false)) {
-            reasons.put("fstat 被 Hook：libc 与原始 syscall 的 st_dev/st_size 不一致，疑似伪造 procfs 句柄");
+            reasons.put(com.android.device.i18n.AppLocale.tr("fstat 被 Hook：libc 与原始 syscall 的 st_dev/st_size 不一致，疑似伪造 procfs 句柄", "fstat hooked: libc vs raw syscall st_dev/st_size mismatch, suspected fake procfs handle"));
         }
         return probe;
     }
@@ -205,7 +205,7 @@ public final class HideDetectionProbe {
             boolean shellVisible = shellPackages.contains(pkg);
             if (shellVisible && !apiVisible) {
                 hiddenHits.put(pkg);
-                reasons.put("PackageManager 隐藏（shell 可见 / API 不可见）: " + pkg);
+                reasons.put(com.android.device.i18n.AppLocale.tr("PackageManager 隐藏（shell 可见 / API 不可见）: ", "PackageManager hidden (visible to shell / invisible to API): ") + pkg);
             }
         }
 
@@ -217,7 +217,7 @@ public final class HideDetectionProbe {
                 for (String pkg : shellPackages) {
                     if (!apiPackages.contains(pkg) && isSensitiveName(pkg) && !contains(hiddenHits, pkg)) {
                         hiddenHits.put(pkg);
-                        reasons.put("PackageManager 隐藏（shell 可见 / API 枚举缺失）: " + pkg);
+                        reasons.put(com.android.device.i18n.AppLocale.tr("PackageManager 隐藏（shell 可见 / API 枚举缺失）: ", "PackageManager hidden (visible to shell / missing from API enumeration): ") + pkg);
                     }
                 }
             }

@@ -199,25 +199,25 @@ public final class CheckEmu {
             return reasons;
         }
         if (indicators.optBoolean("xposedClassPresent", false)) {
-            reasons.put("检测到 Xposed 类: " + HOOK_FRAMEWORK_CLASSES[0]);
+            reasons.put(com.android.device.i18n.AppLocale.tr("检测到 Xposed 类: ", "Xposed class detected: ") + HOOK_FRAMEWORK_CLASSES[0]);
         }
         if (indicators.optBoolean("lsposedClassPresent", false)) {
-            reasons.put("检测到 LSPosed 类: " + HOOK_FRAMEWORK_CLASSES[1]);
+            reasons.put(com.android.device.i18n.AppLocale.tr("检测到 LSPosed 类: ", "LSPosed class detected: ") + HOOK_FRAMEWORK_CLASSES[1]);
         }
         JSONArray hookFiles = indicators.optJSONArray("hookFrameworkFilesPresent");
         if (hookFiles != null) {
             for (int i = 0; i < hookFiles.length(); i++) {
-                reasons.put("Hook 特征文件存在: " + hookFiles.optString(i));
+                reasons.put(com.android.device.i18n.AppLocale.tr("Hook 特征文件存在: ", "Hook artifact file present: ") + hookFiles.optString(i));
             }
         }
         JSONArray mapsMatches = indicators.optJSONArray("procMapsMatches");
         if (mapsMatches != null) {
             for (int i = 0; i < mapsMatches.length(); i++) {
-                reasons.put("/proc/self/maps 命中关键词: " + mapsMatches.optString(i));
+                reasons.put(com.android.device.i18n.AppLocale.tr("/proc/self/maps 命中关键词: ", "/proc/self/maps matched keyword: ") + mapsMatches.optString(i));
             }
         }
         if (!indicators.optBoolean("procMapsScanned", false)) {
-            reasons.put("未能读取 /proc/self/maps");
+            reasons.put(com.android.device.i18n.AppLocale.tr("未能读取 /proc/self/maps", "Failed to read /proc/self/maps"));
         }
         return reasons;
     }
@@ -246,28 +246,28 @@ public final class CheckEmu {
     public static JSONArray buildRootReasons(JSONObject rootSection) {
         JSONArray reasons = new JSONArray();
         if (rootSection.optBoolean("accessGranted", false)) {
-            reasons.put("Root 授权探测成功: " + rootSection.optString("accessDetail", ""));
+            reasons.put(com.android.device.i18n.AppLocale.tr("Root 授权探测成功: ", "Root grant probe succeeded: ") + rootSection.optString("accessDetail", ""));
         }
         JSONObject indicators = rootSection.optJSONObject("indicators");
         if (indicators != null) {
             JSONArray matchedSuPaths = indicators.optJSONArray("matchedSuPaths");
             if (matchedSuPaths != null) {
                 for (int i = 0; i < matchedSuPaths.length(); i++) {
-                    reasons.put("存在 su 路径: " + matchedSuPaths.optString(i));
+                    reasons.put(com.android.device.i18n.AppLocale.tr("存在 su 路径: ", "su path exists: ") + matchedSuPaths.optString(i));
                 }
             }
             String suWhichPath = indicators.optString("suWhichPath", "");
             if (!suWhichPath.isEmpty()) {
-                reasons.put("which su 可用: " + suWhichPath);
+                reasons.put(com.android.device.i18n.AppLocale.tr("which su 可用: ", "which su available: ") + suWhichPath);
             }
             JSONArray matchedMagiskPaths = indicators.optJSONArray("matchedMagiskPaths");
             if (matchedMagiskPaths != null) {
                 for (int i = 0; i < matchedMagiskPaths.length(); i++) {
-                    reasons.put("Magisk 路径存在: " + matchedMagiskPaths.optString(i));
+                    reasons.put(com.android.device.i18n.AppLocale.tr("Magisk 路径存在: ", "Magisk path exists: ") + matchedMagiskPaths.optString(i));
                 }
             }
             if (indicators.optBoolean("testKeysBuild", false)) {
-                reasons.put("构建标签含 test-keys: " + Build.TAGS);
+                reasons.put(com.android.device.i18n.AppLocale.tr("构建标签含 test-keys: ", "Build tags contain test-keys: ") + Build.TAGS);
             }
             if (indicators.optBoolean("roSecureOff", false)) {
                 reasons.put("ro.secure=0");
@@ -276,7 +276,7 @@ public final class CheckEmu {
                 reasons.put("ro.debuggable=1");
             }
             if (indicators.optBoolean("rootedSystemProperty", false)) {
-                reasons.put("vzw.os.rooted 指示已 Root");
+                reasons.put(com.android.device.i18n.AppLocale.tr("vzw.os.rooted 指示已 Root", "vzw.os.rooted indicates rooted"));
             }
         }
         JSONObject rootProbe = rootSection.optJSONObject("rootProbe");
@@ -487,7 +487,7 @@ public final class CheckEmu {
             String jniFind,
             String libcutils
     ) {
-        return key + " 多通道不一致: getprop=" + getprop
+        return key + com.android.device.i18n.AppLocale.tr(" 多通道不一致: getprop=", " multi-channel mismatch: getprop=") + getprop
                 + ", SystemProperties=" + systemProperty
                 + ", jniGet=" + jniGet
                 + ", jniFind=" + jniFind

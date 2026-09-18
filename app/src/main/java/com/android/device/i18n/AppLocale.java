@@ -38,6 +38,11 @@ public final class AppLocale {
         return currentLanguage != null && currentLanguage.toLowerCase().startsWith("zh");
     }
 
+    /** 双语文本：中文模式返回 zh，英文模式返回 en。用于无 Context 的检测器原因文本。 */
+    public static String tr(String zh, String en) {
+        return isChinese() ? zh : en;
+    }
+
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }

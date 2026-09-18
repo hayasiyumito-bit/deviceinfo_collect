@@ -276,7 +276,7 @@ public final class SecurityReportComposer {
     private static JSONArray buildAdbReasons(Context context) throws JSONException {
         JSONArray reasons = new JSONArray();
         if (CheckEmu.isAdbEnabled(context)) {
-            reasons.put("ADB 调试已开启 (Settings.Secure.ADB_ENABLED=1)");
+            reasons.put(com.android.device.i18n.AppLocale.tr("ADB 调试已开启 (Settings.Secure.ADB_ENABLED=1)", "ADB debugging enabled (Settings.Secure.ADB_ENABLED=1)"));
         }
         return reasons;
     }

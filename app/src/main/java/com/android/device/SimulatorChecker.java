@@ -443,14 +443,14 @@ public class SimulatorChecker {
     public static JSONArray collectDetectionReasons(Context context) {
         JSONArray reasons = new JSONArray();
         if (!hasLightSensor(context)) {
-            reasons.put("无光线传感器");
+            reasons.put(com.android.device.i18n.AppLocale.tr("无光线传感器", "No light sensor"));
         }
         if (isPCSideCPU()) {
-            reasons.put("/proc/cpuinfo 含 Intel/AMD 特征");
+            reasons.put(com.android.device.i18n.AppLocale.tr("/proc/cpuinfo 含 Intel/AMD 特征", "/proc/cpuinfo contains Intel/AMD characteristics"));
         }
         JSONArray existingFiles = listExistingEmulatorFiles();
         for (int i = 0; i < existingFiles.length(); i++) {
-            reasons.put("模拟器特征文件存在: " + existingFiles.optString(i));
+            reasons.put(com.android.device.i18n.AppLocale.tr("模拟器特征文件存在: ", "Emulator artifact file present: ") + existingFiles.optString(i));
         }
         return reasons;
     }

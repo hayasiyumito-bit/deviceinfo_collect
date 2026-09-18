@@ -140,7 +140,7 @@ public final class DeviceInfoParser {
             }
             items.add(new DeviceInfoItem(
                     "remediation",
-                    "修复指引(详)",
+                    com.android.device.i18n.AppLocale.tr("修复指引(详)", "Fix guidance (detailed)"),
                     remediationSummary,
                     "安全检测",
                     remediationItem.getFullValue()
@@ -220,7 +220,7 @@ public final class DeviceInfoParser {
             boolean anyRisk = summary != null && summary.optBoolean("anyRisk", false);
             items.add(new DeviceInfoItem(
                     "security.overview.anyRisk",
-                    "存在安全风险",
+                    com.android.device.i18n.AppLocale.tr("存在安全风险", "Security risk present"),
                     yesNo(anyRisk),
                     "安全检测",
                     String.valueOf(anyRisk)
@@ -230,7 +230,7 @@ public final class DeviceInfoParser {
                 if (anyRiskReasons.length() > 0) {
                     items.add(new DeviceInfoItem(
                             "security.overview.anyRiskReasons",
-                            "安全风险原因",
+                            com.android.device.i18n.AppLocale.tr("安全风险原因", "Security risk reasons"),
                             formatReasonArray(anyRiskReasons),
                             "安全检测",
                             anyRiskReasons.toString()
@@ -291,8 +291,8 @@ public final class DeviceInfoParser {
         boolean isRooted = summary != null && summary.optBoolean("isRooted", false);
         items.add(new DeviceInfoItem(
                 "security.root.overview",
-                "Root/越狱检测",
-                isRooted ? "已 ROOT" : "未检测到",
+                com.android.device.i18n.AppLocale.tr("Root/越狱检测", "Root/jailbreak detection"),
+                isRooted ? com.android.device.i18n.AppLocale.tr("已 ROOT", "ROOTED") : com.android.device.i18n.AppLocale.tr("未检测到", "Not detected"),
                 "安全检测",
                 String.valueOf(isRooted)
         ));
@@ -370,7 +370,7 @@ public final class DeviceInfoParser {
 
         // Root 检测原因
         if (reasons != null) {
-            appendReasonBlock(items, reasons, "root", "Root 检测原因");
+            appendReasonBlock(items, reasons, "root", com.android.device.i18n.AppLocale.tr("Root 检测原因", "Root detection reasons"));
         }
     }
 
@@ -475,8 +475,8 @@ public final class DeviceInfoParser {
 
         items.add(new DeviceInfoItem(
                 "security.hook.overview",
-                "Hook检测",
-                anyHookSignal ? "检测到 Hook 框架" : "未检测到",
+                com.android.device.i18n.AppLocale.tr("Hook检测", "Hook detection"),
+                anyHookSignal ? com.android.device.i18n.AppLocale.tr("检测到 Hook 框架", "Hook framework detected") : com.android.device.i18n.AppLocale.tr("未检测到", "Not detected"),
                 "安全检测",
                 String.valueOf(anyHookSignal)
         ));
@@ -491,7 +491,7 @@ public final class DeviceInfoParser {
                     items.add(new DeviceInfoItem(
                             "security.hook.xposed",
                             "Xposed / LSPosed",
-                            "是",
+                            com.android.device.i18n.AppLocale.tr("是", "Yes"),
                             "安全检测",
                             "Xposed: " + xposed + ", LSPosed: " + lsposed
                     ));
@@ -501,11 +501,11 @@ public final class DeviceInfoParser {
                 if (procMapsMatches != null && procMapsMatches.length() > 0) {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < procMapsMatches.length(); i++) {
-                        sb.append("• /proc/self/maps 命中: ").append(procMapsMatches.optString(i)).append('\n');
+                        sb.append(com.android.device.i18n.AppLocale.tr("• /proc/self/maps 命中: ", "• /proc/self/maps hit: ")).append(procMapsMatches.optString(i)).append('\n');
                     }
                     items.add(new DeviceInfoItem(
                             "security.hook.procMaps",
-                            "Proc Maps 命中",
+                            com.android.device.i18n.AppLocale.tr("Proc Maps 命中", "Proc maps hits"),
                             formatReasonArray(procMapsMatches),
                             "安全检测",
                             sb.toString().trim()
@@ -516,11 +516,11 @@ public final class DeviceInfoParser {
                 if (hookFiles != null && hookFiles.length() > 0) {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < hookFiles.length(); i++) {
-                        sb.append("• Hook 特征文件: ").append(hookFiles.optString(i)).append('\n');
+                        sb.append(com.android.device.i18n.AppLocale.tr("• Hook 特征文件: ", "• Hook artifact file: ")).append(hookFiles.optString(i)).append('\n');
                     }
                     items.add(new DeviceInfoItem(
                             "security.hook.files",
-                            "Hook 特征文件",
+                            com.android.device.i18n.AppLocale.tr("Hook 特征文件", "Hook artifact files"),
                             sb.toString().trim(),
                             "安全检测",
                             sb.toString().trim()
@@ -543,8 +543,8 @@ public final class DeviceInfoParser {
                 if (tamperedKeys.length() > 0) {
                     items.add(new DeviceInfoItem(
                             "security.hook.tampered",
-                            "属性被篡改",
-                            tamperedKeys.length() + " 个属性不一致",
+                            com.android.device.i18n.AppLocale.tr("属性被篡改", "Properties tampered"),
+                            tamperedKeys.length() + com.android.device.i18n.AppLocale.tr(" 个属性不一致", " properties inconsistent"),
                             "安全检测",
                             tamperedKeys.toString()
                     ));
@@ -553,8 +553,8 @@ public final class DeviceInfoParser {
         }
 
         if (reasons != null) {
-            appendReasonBlock(items, reasons, "hook", "Hook 检测原因");
-            appendReasonBlock(items, reasons, "propertyTamper", "属性篡改原因");
+            appendReasonBlock(items, reasons, "hook", com.android.device.i18n.AppLocale.tr("Hook 检测原因", "Hook detection reasons"));
+            appendReasonBlock(items, reasons, "propertyTamper", com.android.device.i18n.AppLocale.tr("属性篡改原因", "Property tamper reasons"));
         }
     }
 
@@ -577,8 +577,8 @@ public final class DeviceInfoParser {
 
         items.add(new DeviceInfoItem(
                 "security.env.overview",
-                "环境检测",
-                anyEnvSignal ? "存在环境风险" : "环境正常",
+                com.android.device.i18n.AppLocale.tr("环境检测", "Environment detection"),
+                anyEnvSignal ? com.android.device.i18n.AppLocale.tr("存在环境风险", "Environment risk present") : com.android.device.i18n.AppLocale.tr("环境正常", "Environment normal"),
                 "安全检测",
                 String.valueOf(anyEnvSignal)
         ));
@@ -608,18 +608,18 @@ public final class DeviceInfoParser {
         // 环境检测明细
         JSONObject environment = security.optJSONObject("environment");
         if (environment != null) {
-            appendDetailBlock(items, environment, "security.environment", "环境检测明细");
+            appendDetailBlock(items, environment, "security.environment", com.android.device.i18n.AppLocale.tr("环境检测明细", "Environment detection detail"));
         }
         JSONObject simulator = security.optJSONObject("simulator");
         if (simulator != null) {
-            appendDetailBlock(items, simulator, "security.simulator", "模拟器检测明细");
+            appendDetailBlock(items, simulator, "security.simulator", com.android.device.i18n.AppLocale.tr("模拟器检测明细", "Emulator detection detail"));
         }
 
         JSONObject reasons = security.optJSONObject("reasons");
         if (reasons != null) {
-            appendReasonBlock(items, reasons, "environment", "环境检测原因");
-            appendReasonBlock(items, reasons, "adb", "ADB 检测原因");
-            appendReasonBlock(items, reasons, "simulator", "模拟器检测原因");
+            appendReasonBlock(items, reasons, "environment", com.android.device.i18n.AppLocale.tr("环境检测原因", "Environment detection reasons"));
+            appendReasonBlock(items, reasons, "adb", com.android.device.i18n.AppLocale.tr("ADB 检测原因", "ADB detection reasons"));
+            appendReasonBlock(items, reasons, "simulator", com.android.device.i18n.AppLocale.tr("模拟器检测原因", "Emulator detection reasons"));
         }
     }
 
@@ -635,8 +635,8 @@ public final class DeviceInfoParser {
         String summary = remediation.optString("summary", "");
         items.add(new DeviceInfoItem(
                 "security.remediation.verdict",
-                "修复判定",
-                "RISK_DETECTED".equals(verdict) ? "存在风险，需修复" : "PASS，无需修复",
+                com.android.device.i18n.AppLocale.tr("修复判定", "Fix verdict"),
+                "RISK_DETECTED".equals(verdict) ? com.android.device.i18n.AppLocale.tr("存在风险，需修复", "Risks present, fix needed") : com.android.device.i18n.AppLocale.tr("PASS，无需修复", "PASS, no fix needed"),
                 "安全检测",
                 verdict + " | " + summary
         ));
@@ -645,7 +645,7 @@ public final class DeviceInfoParser {
         if (fixHints != null && fixHints.length() > 0) {
             items.add(new DeviceInfoItem(
                     "security.remediation.hints",
-                    "修复指引",
+                    com.android.device.i18n.AppLocale.tr("修复指引", "Fix guidance"),
                     formatReasonArray(fixHints),
                     "安全检测",
                     fixHints.toString()
@@ -1769,7 +1769,7 @@ public final class DeviceInfoParser {
             return "null";
         }
         if (value instanceof JSONObject) {
-            return "[JSON对象 · 点击查看详情]";
+            return com.android.device.i18n.AppLocale.tr("[JSON对象 · 点击查看详情]", "[JSON object · tap for detail]");
         }
         if (value instanceof JSONArray) {
             return com.android.device.i18n.AppLocale.isChinese() ? "[JSON数组 · 点击查看详情]" : "[JSON array · tap for detail]";
