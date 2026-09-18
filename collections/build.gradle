@@ -32,7 +32,9 @@ android {
 
         release {
             zipAlignEnabled true
-            minifyEnabled true
+            // 库不自混淆：由 :app 的 R8 对整个程序统一混淆，避免库先改名导致
+            // app 引用 HackChecker/DeviceSnapshot/Cmd 等类时 R8「Missing class」及运行期 NoClassDefFound。
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable false
 
