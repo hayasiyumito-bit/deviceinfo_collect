@@ -221,7 +221,7 @@ public final class DeviceInfoParser {
             items.add(new DeviceInfoItem(
                     "security.overview.anyRisk",
                     "存在安全风险",
-                    anyRisk ? "是" : "否",
+                    yesNo(anyRisk),
                     "安全检测",
                     String.valueOf(anyRisk)
             ));
@@ -317,10 +317,16 @@ public final class DeviceInfoParser {
                 "suBinaryFound", "rootManagerDetected", "busyboxDetected",
                 "rootHideDetected", "dangerousAppDetected"
         };
-        String[] rootDisplayNames = {
+        String[] rootDisplayNames = com.android.device.i18n.AppLocale.isChinese()
+                ? new String[]{
                 "APatch", "APatch（增强型）", "Magisk", "KernelSU", "KernelSU（备选）",
                 "系统 Root (su)", "找到 SU 可执行文件", "Root 管理器应用 / 分支",
                 "BusyBox 二进制文件", "Root 隐藏应用", "危险应用 / 修改工具"
+        }
+                : new String[]{
+                "APatch", "APatch (enhanced)", "Magisk", "KernelSU", "KernelSU (fallback)",
+                "System root (su)", "SU binary found", "Root manager app / variant",
+                "BusyBox binary", "Root-hiding app", "Dangerous app / modding tool"
         };
 
         for (int i = 0; i < rootFrameworkKeys.length; i++) {
@@ -356,7 +362,7 @@ public final class DeviceInfoParser {
             items.add(new DeviceInfoItem(
                     "security.root." + fwKey,
                     displayName,
-                    detected ? "是" : "否",
+                    yesNo(detected),
                     "安全检测",
                     details.isEmpty() ? String.valueOf(detected) : details
             ));
@@ -854,6 +860,11 @@ public final class DeviceInfoParser {
     }
 
     static String translateBuildField(String fieldKey) {
+        String label = com.android.device.i18n.AppLocale.isChinese() ? translateBuildFieldZh(fieldKey) : translateBuildFieldEn(fieldKey);
+        return label != null ? label : fieldKey;
+    }
+
+    private static String translateBuildFieldZh(String fieldKey) {
         switch (fieldKey) {
             case "MODEL":
                 return "型号";
@@ -918,7 +929,76 @@ public final class DeviceInfoParser {
             case "RESOURCES_SDK_INT":
                 return "资源 SDK";
             default:
-                return fieldKey;
+                return null;
+        }
+    }
+
+    private static String translateBuildFieldEn(String fieldKey) {
+        switch (fieldKey) {
+            case "MODEL":
+                return "Model";
+            case "BRAND":
+                return "Brand";
+            case "MANUFACTURER":
+                return "Manufacturer";
+            case "DEVICE":
+                return "Device name";
+            case "PRODUCT":
+                return "Product name";
+            case "FINGERPRINT":
+                return "Fingerprint";
+            case "HARDWARE":
+                return "Hardware";
+            case "BOARD":
+                return "Board";
+            case "BOOTLOADER":
+                return "Bootloader";
+            case "DISPLAY":
+                return "Display ID";
+            case "HOST":
+                return "Build host";
+            case "ID":
+                return "Build ID";
+            case "TAGS":
+                return "Tags";
+            case "TYPE":
+                return "Build type";
+            case "USER":
+                return "Build user";
+            case "TIME":
+                return "Build timestamp";
+            case "RADIO":
+                return "Baseband version";
+            case "CPU_ABI":
+                return "CPU ABI";
+            case "CPU_ABI2":
+                return "CPU ABI2";
+            case "SUPPORTED_ABIS":
+                return "Supported ABIs";
+            case "SUPPORTED_32_BIT_ABIS":
+                return "32-bit ABIs";
+            case "SUPPORTED_64_BIT_ABIS":
+                return "64-bit ABIs";
+            case "SERIAL":
+                return "Serial number";
+            case "SDK_INT":
+                return "SDK version";
+            case "RELEASE":
+                return "OS version";
+            case "INCREMENTAL":
+                return "Incremental version";
+            case "CODENAME":
+                return "Codename";
+            case "SECURITY_PATCH":
+                return "Security patch";
+            case "BASE_OS":
+                return "Base OS";
+            case "PREVIEW_SDK_INT":
+                return "Preview SDK";
+            case "RESOURCES_SDK_INT":
+                return "Resources SDK";
+            default:
+                return null;
         }
     }
 
@@ -991,7 +1071,30 @@ public final class DeviceInfoParser {
         return "其他信息";
     }
 
+    /** 布尔显示值：按界面语言返回 是/否 或 Yes/No。 */
+    private static String yesNo(boolean v) {
+        if (com.android.device.i18n.AppLocale.isChinese()) {
+            return v ? "是" : "否";
+        }
+        return v ? "Yes" : "No";
+    }
+
     static String translateKey(String key) {
+        String label = com.android.device.i18n.AppLocale.isChinese() ? translateKeyZh(key) : translateKeyEn(key);
+        if (label != null) {
+            return label;
+        }
+        if (key.startsWith("build.")) {
+            return translateBuildField(key.substring("build.".length()));
+        }
+        if (key.startsWith("envCheck.") || key.startsWith("securityCheck.") || key.startsWith("security.")) {
+            int dot = key.indexOf('.');
+            return translateKey(key.substring(dot + 1));
+        }
+        return key;
+    }
+
+    private static String translateKeyZh(String key) {
         switch (key) {
             case "time":
                 return "收集时间";
@@ -1322,14 +1425,342 @@ public final class DeviceInfoParser {
             case "service_list":
                 return "服务列表";
             default:
-                if (key.startsWith("build.")) {
-                    return translateBuildField(key.substring("build.".length()));
-                }
-                if (key.startsWith("envCheck.") || key.startsWith("securityCheck.") || key.startsWith("security.")) {
-                    int dot = key.indexOf('.');
-                    return translateKey(key.substring(dot + 1));
-                }
-                return key;
+                return null;
+        }
+    }
+
+    private static String translateKeyEn(String key) {
+        switch (key) {
+            case "time":
+                return "Collected at";
+            case "collectedAt":
+                return "Collection timestamp (ms)";
+            case "anyRisk":
+                return "Security risk present";
+            case "anyRiskReasons":
+                return "Security risk reasons";
+            case "anyRiskFixHints":
+                return "Fix hints (brief)";
+            case "remediation":
+                return "Fix guidance (detailed)";
+            case "remediation.summary":
+                return "Fix summary";
+            case "remediation.items":
+                return "Fix item list";
+            case "remediation.regressionChecklist":
+                return "Regression checklist";
+            case "remediation.yumyhookReferences":
+                return "YumyHook reference paths";
+            case "fixTarget":
+                return "Fix target";
+            case "fixAction":
+                return "Fix action";
+            case "verify":
+                return "Regression verification";
+            case "detectorSource":
+                return "Detector source";
+            case "severity":
+                return "Severity";
+            case "security":
+                return "Security check (full JSON)";
+            case "security.summary":
+                return "Security check summary";
+            case "security.reasons.hook":
+                return "Hook detection reasons";
+            case "security.reasons.root":
+                return "Root detection reasons";
+            case "security.reasons.propertyTamper":
+                return "Property tamper reasons";
+            case "security.reasons.environment":
+                return "Environment detection reasons";
+            case "security.reasons.adb":
+                return "ADB detection reasons";
+            case "security.reasons.simulator":
+                return "Emulator detection reasons";
+            case "security.hook":
+                return "Hook detection detail";
+            case "security.root":
+                return "Root detection detail";
+            case "security.environment":
+                return "Environment detection detail";
+            case "security.simulator":
+                return "Emulator detection detail";
+            case "frameworkDetected":
+                return "Hook framework detected";
+            case "propertyTampered":
+                return "System properties tampered";
+            case "frameworkIndicators":
+                return "Hook framework indicators";
+            case "accessGranted":
+                return "Root grant result";
+            case "accessDetail":
+                return "Root grant detail";
+            case "indicators":
+                return "Root indicators";
+            case "matchedSuPaths":
+                return "Matched su paths";
+            case "matchedMagiskPaths":
+                return "Matched Magisk paths";
+            case "suWhichPath":
+                return "which su result";
+            case "tamperReason":
+                return "Tamper reason";
+            case "isVpn":
+                return "VPN connected";
+            case "simulatorDetected":
+                return "Emulator verdict";
+            case "anyHookSignal":
+                return "Hook signal present";
+            case "anyRootSignal":
+                return "Root signal present";
+            case "detected":
+                return "Emulator verdict";
+            case "isPcCpu":
+                return "PC CPU (Intel/AMD)";
+            case "emulatorFiles":
+                return "Emulator artifact files";
+            case "envCheck":
+                return "Environment check (full JSON)";
+            case "securityCheck":
+                return "Hook/Root check (full JSON)";
+            case "rootAccessGranted":
+                return "Root grant result";
+            case "rootAccessDetail":
+                return "Root grant detail";
+            case "isRooted":
+                return "Rooted";
+            case "kernelsuDetected":
+                return "KernelSU";
+            case "kernelsuBackupDetected":
+                return "KernelSU (fallback)";
+            case "apatchDetected":
+                return "APatch";
+            case "apatchEnhancedDetected":
+                return "APatch (enhanced)";
+            case "systemSuDetected":
+                return "System root (su)";
+            case "suBinaryFound":
+                return "SU binary found";
+            case "rootManagerDetected":
+                return "Root manager app / variant";
+            case "busyboxDetected":
+                return "BusyBox binary";
+            case "rootHideDetected":
+                return "Root-hiding app";
+            case "dangerousAppDetected":
+                return "Dangerous app / modding tool";
+            case "magiskDetected":
+                return "Magisk";
+            case "security.overview.anyRisk":
+                return "Security risk present";
+            case "security.overview.anyRiskReasons":
+                return "Security risk reasons";
+            case "security.root.overview":
+                return "Root/jailbreak detection";
+            case "security.hook.overview":
+                return "Hook detection";
+            case "security.hook.xposed":
+                return "Xposed / LSPosed";
+            case "security.hook.procMaps":
+                return "Proc maps hits";
+            case "security.hook.files":
+                return "Hook artifact files";
+            case "security.hook.tampered":
+                return "Properties tampered";
+            case "security.env.overview":
+                return "Environment detection";
+            case "security.env.emulator":
+                return "Suspected emulator";
+            case "security.env.simulator":
+                return "Emulator verdict";
+            case "security.env.vpn":
+                return "VPN connected";
+            case "security.env.debug":
+                return "Debug mode";
+            case "security.env.adb":
+                return "ADB debugging enabled";
+            case "security.env.bootloader":
+                return "Bootloader unlocked";
+            case "security.env.hideSuspected":
+                return "Suspected root hiding";
+            case "security.remediation.verdict":
+                return "Fix verdict";
+            case "security.remediation.hints":
+                return "Fix hints";
+            case "frameworkConfirmed":
+                return "Root framework confirmed";
+            case "bootloaderUnlocked":
+                return "Bootloader unlocked";
+            case "magiskHideSuspected":
+                return "Suspected root hiding";
+            case "frameworks":
+                return "Root framework classification";
+            case "rootProbe":
+                return "Root framework deep probe";
+            case "magisk":
+                return "Root framework probe (compat field)";
+            case "sharedIndicators":
+                return "Root shared probe indicators";
+            case "hideSuspected":
+                return "Suspected root hiding";
+            case "nativeProbe":
+                return "Native root probe";
+            case "matchedPaths":
+                return "Root path hits";
+            case "packageHits":
+                return "Root manager packages";
+            case "propertyHits":
+                return "Root framework properties";
+            case "mapsHits":
+                return "maps hits";
+            case "mountHits":
+                return "mounts hits";
+            case "mountInfoHits":
+                return "mountinfo hits";
+            case "shellHits":
+                return "Shell probe hits";
+            case "magiskProperties":
+                return "Magisk-related properties";
+            case "displayName":
+                return "Framework name";
+            case "systemSu":
+                return "System su";
+            case "kernelsu":
+                return "KernelSU";
+            case "kernelsuBackup":
+                return "KernelSU (fallback)";
+            case "apatch":
+                return "APatch";
+            case "apatchEnhanced":
+                return "APatch (enhanced)";
+            case "suBinary":
+                return "SU binary found";
+            case "rootManager":
+                return "Root manager app / variant";
+            case "busybox":
+                return "BusyBox binary";
+            case "rootHide":
+                return "Root-hiding app";
+            case "dangerousApp":
+                return "Dangerous app / modding tool";
+            case "bootUnlockSignals":
+                return "Boot unlock signals";
+            case "buildMismatches":
+                return "Build/property mismatches";
+            case "suspiciousPackages":
+                return "Suspicious packages";
+            case "selinuxMode":
+                return "SELinux mode";
+            case "suReadlink":
+                return "su symlink";
+            case "idOutput":
+                return "id command output";
+            case "isAdbEnabled":
+                return "ADB debugging enabled";
+            case "isPropertyTampered":
+                return "System properties tampered";
+            case "hookFrameworkDetected":
+                return "Hook framework detected";
+            case "hookFrameworkIndicators":
+                return "Hook framework indicator detail";
+            case "hookDetectionSummary":
+                return "Hook detection summary";
+            case "hookFrameworkFilesPresent":
+                return "Hook artifact files (present)";
+            case "procMapsMatches":
+                return "/proc/self/maps matched keywords";
+            case "procMapsScanned":
+                return "proc maps scanned";
+            case "xposedClassPresent":
+                return "Xposed class present";
+            case "lsposedClassPresent":
+                return "LSPosed class present";
+            case "tamperedPropertyKeys":
+                return "Inconsistent property keys";
+            case "probePropertyKeys":
+                return "Probed property keys";
+            case "detectedSignals":
+                return "Detected signals";
+            case "propertyProbes":
+                return "Property multi-channel probe";
+            case "rootIndicators":
+                return "Root indicators";
+            case "suBinaryExists":
+                return "su binary exists";
+            case "suCommandAvailable":
+                return "su command available";
+            case "suShellGranted":
+                return "su command granted root";
+            case "testKeysBuild":
+                return "test-keys build";
+            case "roSecureOff":
+                return "ro.secure=0";
+            case "roDebuggableOn":
+                return "ro.debuggable=1";
+            case "rootedSystemProperty":
+                return "Root system property";
+            case "magiskPathExists":
+                return "Magisk path exists";
+            case "getprop":
+                return "getprop channel";
+            case "SystemProperties":
+                return "SystemProperties channel";
+            case "jniGet":
+                return "JNI __system_property_get";
+            case "jniFind":
+                return "JNI __system_property_find";
+            case "channelErrors":
+                return "JNI channel errors";
+            case "libcutils":
+                return "JNI property_get";
+            case "tampered":
+                return "Channel mismatch (suspected hook)";
+            case "simulator_detected":
+                return "Emulator verdict";
+            case "simulator_hasLightSensor":
+                return "Light sensor present";
+            case "simulator_isPcCpu":
+                return "PC CPU (Intel/AMD)";
+            case "simulator_emulatorFiles":
+                return "Emulator artifact files";
+            case "isEmulator":
+                return "Suspected emulator";
+            case "isVPN":
+                return "VPN connected";
+            case "isDebug":
+                return "Debug / debuggable";
+            case "appsflyerdebuginfo":
+                return "AppsFlyer debug info";
+            case "ids":
+                return "Device identifiers";
+            case "build":
+                return "Build info (full JSON)";
+            case "storage":
+                return "Storage info";
+            case "sensor":
+                return "Sensor info";
+            case "hardware":
+                return "Hardware info";
+            case "batteryInfo":
+                return "Battery info";
+            case "net":
+                return "Network info";
+            case "location":
+                return "Location info";
+            case "packageInfo":
+                return "Package info";
+            case "uname":
+                return "System info (uname)";
+            case "fileStat":
+                return "File status";
+            case "ringTitle":
+                return "Default ringtone";
+            case "installedApps":
+                return "Installed apps";
+            case "service_list":
+                return "Service list";
+            default:
+                return null;
         }
     }
 
@@ -1341,17 +1772,17 @@ public final class DeviceInfoParser {
             return "[JSON对象 · 点击查看详情]";
         }
         if (value instanceof JSONArray) {
-            return "[JSON数组 · 点击查看详情]";
+            return com.android.device.i18n.AppLocale.isChinese() ? "[JSON数组 · 点击查看详情]" : "[JSON array · tap for detail]";
         }
         if (value instanceof Boolean) {
-            return (Boolean) value ? "是" : "否";
+            return yesNo((Boolean) value);
         }
         String text = value.toString();
         if ("true".equalsIgnoreCase(text)) {
-            return "是";
+            return yesNo(true);
         }
         if ("false".equalsIgnoreCase(text)) {
-            return "否";
+            return yesNo(false);
         }
         if (text.length() > 120) {
             return text.substring(0, 117) + "...";

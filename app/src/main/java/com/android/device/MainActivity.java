@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.device.i18n.AppLocale;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppLocale.applyFromCache(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -255,8 +257,32 @@ public class MainActivity extends AppCompatActivity {
                     .setPositiveButton(R.string.action_ok, null)
                     .show();
             return true;
+        } else if (id == R.id.action_language) {
+            showLanguageDialog();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /** 主页语言切换：English / 中文，写入 SP 长期缓存，切换后系统重建界面。 */
+    private void showLanguageDialog() {
+        final String[] labels = {
+                getString(R.string.language_english),
+                getString(R.string.language_chinese),
+        };
+        final String[] tags = {AppLocale.EN, AppLocale.ZH};
+        String current = AppLocale.getLanguage(this);
+        int checked = current.equalsIgnoreCase(AppLocale.ZH) ? 1 : 0;
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.language_title)
+                .setSingleChoiceItems(labels, checked, (dialog, which) -> {
+                    dialog.dismiss();
+                    if (!tags[which].equalsIgnoreCase(current)) {
+                        AppLocale.setLanguage(this, tags[which]);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     @Override

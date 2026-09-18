@@ -57,7 +57,9 @@ public class DeviceInfoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (getItemViewType(position) == TYPE_CATEGORY) {
             CategoryViewHolder categoryHolder = (CategoryViewHolder) holder;
             String category = (String) items.get(position);
-            categoryHolder.categoryText.setText(category);
+            categoryHolder.categoryText.setText(
+                    com.android.device.i18n.CategoryLabels.localize(
+                            categoryHolder.itemView.getContext(), category));
         } else {
             ItemViewHolder itemHolder = (ItemViewHolder) holder;
             DeviceInfoItem item = (DeviceInfoItem) items.get(position);
