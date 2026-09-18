@@ -1,0 +1,24 @@
+device-collection — Provenance Notice
+Copyright (c) 2026 Yumito. All rights reserved.
+
+Public License (third parties): CC BY-NC 4.0
+Copyright Holder Commercial Rights: Yumito (exclusive, reserved)
+
+----------------------------------------------------------------------
+Traceability Fingerprint (do not remove)
+----------------------------------------------------------------------
+
+  Fingerprint : YDC-7F3A9C2E-202607
+  Project ID  : device-collection
+  Owner       : Yumito
+  Repository  : https://gitee.com/Yumito/device-collection
+  License     : CC-BY-NC-4.0 (public) / Commercial rights reserved (Yumito)
+
+This fingerprint is embedded in:
+  - Source: com.android.device.provenance.ProjectProvenance
+  - Native: libdevice.so (kProvenanceWatermark)
+  - APK meta-data: com.android.device.provenance.*
+  - Export JSON: _provenance block in debug_output.json
+  - BuildConfig: PROVENANCE_FINGERPRINT
+
+Unauthorized removal or commercial redistribution may violate LICENSE.
