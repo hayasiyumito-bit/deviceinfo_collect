@@ -77,30 +77,24 @@ public class Location {
                     criteria.setCostAllowed(true);// 允许有花费
                     criteria.setPowerRequirement(Criteria.POWER_LOW);//低功耗
                     String locationProvider = locationManager.getBestProvider(criteria, true);
-                    bestLocation = locationManager.getLastKnownLocation(locationProvider);
-                    while (bestLocation == null) {
-                        locationManager.requestLocationUpdates(locationProvider, 0, 0, new LocationListener() {
-                            @Override
-                            public void onLocationChanged(android.location.Location location) {
-                                bestLocation = location;
-                                locationManager.removeUpdates(this);
+                    // 单次快照：优先 bestProvider 的 lastKnownLocation，为空则遍历所有 provider。
+                    // 原实现是 while(bestLocation==null){ requestLocationUpdates(...) } 死循环，
+                    // 在无定位（模拟器/无 fix）时会在采集线程上无限自旋并阻塞回调，导致 location 永远拿不到。
+                    bestLocation = null;
+                    if (locationProvider != null) {
+                        bestLocation = locationManager.getLastKnownLocation(locationProvider);
+                    }
+                    if (bestLocation == null) {
+                        for (String p : locationManager.getProviders(true)) {
+                            try {
+                                android.location.Location l = locationManager.getLastKnownLocation(p);
+                                if (l != null) {
+                                    bestLocation = l;
+                                    break;
+                                }
+                            } catch (Exception ignored) {
                             }
-
-                            @Override
-                            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                            }
-
-                            @Override
-                            public void onProviderEnabled(String provider) {
-
-                            }
-
-                            @Override
-                            public void onProviderDisabled(String provider) {
-
-                            }
-                        });
+                        }
                     }
 
                     if (bestLocation != null) {

@@ -54,17 +54,24 @@ final class SnapshotFields {
     }
 
     static void fillAll(Context context, JSONObject root) {
+        // 每个域独立 try/catch：某个域抛异常（如某机型 putHardware 传感器/USB 读取失败）时，
+        // 不再中断后续所有域。此前是整段一个 try，首个抛出的域会吞掉 net/location/spoofProbe
+        // 等其后全部字段（本机即在 putHardware 处中断，导致位置/伪装核对栏目永远缺失）。
+        guard(() -> putAppsAndIds(context, root), "appsAndIds");
+        guard(() -> putInputAndMedia(context, root), "inputAndMedia");
+        guard(() -> putHardware(context, root), "hardware");
+        guard(() -> putStorage(context, root), "storage");
+        guard(() -> putNetAndLocation(context, root), "netAndLocation");
+        guard(() -> putSoftwareStack(context, root), "softwareStack");
+        guard(() -> putSystemMisc(context, root), "systemMisc");
+        guard(() -> putRingtone(context, root), "ringtone");
+    }
+
+    private static void guard(Runnable section, String name) {
         try {
-            putAppsAndIds(context, root);
-            putInputAndMedia(context, root);
-            putHardware(context, root);
-            putStorage(context, root);
-            putNetAndLocation(context, root);
-            putSoftwareStack(context, root);
-            putSystemMisc(context, root);
-            putRingtone(context, root);
-        } catch (Exception e) {
-            Log.e(TAG, "Error during snapshot assembly", e);
+            section.run();
+        } catch (Throwable t) {
+            Log.e(TAG, "snapshot section failed: " + name, t);
         }
     }
 
@@ -100,8 +107,10 @@ final class SnapshotFields {
     }
 
     private static void putNetAndLocation(Context context, JSONObject root) {
-        JsonPut.put(root, "net", Net.getNetInfo(context));
-        JsonPut.put(root, "location", Location.getLocationInfo(context));
+        guard(() -> JsonPut.put(root, "net", Net.getNetInfo(context)), "net");
+        guard(() -> JsonPut.put(root, "location", Location.getLocationInfo(context)), "location");
+        // 伪装核对栏目：集中展示 IMEI/IMSI/手机号/序列号/SIM/位置，便于对照 Hook 注入值
+        guard(() -> JsonPut.put(root, "spoofProbe", SpoofProbe.get(context)), "spoofProbe");
     }
 
     private static void putSoftwareStack(Context context, JSONObject root) {
