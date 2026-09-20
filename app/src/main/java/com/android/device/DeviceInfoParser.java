@@ -1079,7 +1079,7 @@ public final class DeviceInfoParser {
         return v ? "Yes" : "No";
     }
 
-    static String translateKey(String key) {
+    public static String translateKey(String key) {
         String label = com.android.device.i18n.AppLocale.isChinese() ? translateKeyZh(key) : translateKeyEn(key);
         if (label != null) {
             return label;
@@ -1764,7 +1764,7 @@ public final class DeviceInfoParser {
         }
     }
 
-    static String formatValue(Object value) {
+    public static String formatValue(Object value) {
         if (value == null) {
             return "null";
         }
@@ -1790,7 +1790,7 @@ public final class DeviceInfoParser {
         return text;
     }
 
-    static String formatJsonForDisplay(Object json) {
+    public static String formatJsonForDisplay(Object json) {
         try {
             if (json instanceof JSONObject) {
                 return formatJsonObject((JSONObject) json, 0);

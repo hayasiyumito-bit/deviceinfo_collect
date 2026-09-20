@@ -37,4 +37,96 @@
     <string name="cat_storage">存储信息</string>
     <string name="cat_sensor">传感器信息</string>
     <string name="cat_other">其他信息</string>
+
+    <!-- 底部导航 -->
+    <string name="tab_security">风控</string>
+    <string name="tab_system">系统</string>
+    <string name="tab_hardware">硬件</string>
+    <string name="tab_network">网络</string>
+    <string name="tab_apps">应用</string>
+
+    <!-- 主题配色 -->
+    <string name="menu_theme">主题配色</string>
+    <string name="theme_title">主题配色</string>
+    <string name="theme_cyber_blue">赛博蓝</string>
+    <string name="theme_neon_green">霓虹绿</string>
+    <string name="theme_sakura_pink">樱花粉</string>
+    <string name="theme_sunset_orange">日暮橙</string>
+    <string name="theme_grape">深邃紫</string>
+    <string name="theme_graphite">石墨灰</string>
+
+    <!-- 通用 UI -->
+    <string name="search_hint">搜索参数</string>
+    <string name="empty_hint">暂无数据</string>
+    <string name="card_scan_at">扫描于 %1$s</string>
+    <string name="pull_to_refresh">下拉重新扫描</string>
+
+    <!-- 风控仪表盘 -->
+    <string name="risk_verdict_danger">检测到风险</string>
+    <string name="risk_verdict_safe">未见风险</string>
+    <string name="risk_hits">%1$d 项风险信号</string>
+    <string name="risk_no_hits">全部检测通过</string>
+    <string name="risk_reasons_title">风险原因</string>
+    <string name="sec_root">Root</string>
+    <string name="sec_hook">Hook / Xposed</string>
+    <string name="sec_simulator">模拟器</string>
+    <string name="sec_environment">运行环境</string>
+    <string name="sec_remediation">修复建议</string>
+    <string name="val_yes">是</string>
+    <string name="val_no">否</string>
+    <string name="root_rooted">已 Root</string>
+    <string name="root_clean">未 Root</string>
+
+    <!-- 加载 -->
+    <string name="loading_hint">正在采集设备信息…</string>
+    <string name="menu_realtime">实时监测</string>
+
+    <!-- 数据展开 -->
+    <string name="card_overview">概要</string>
+    <string name="view_detail">查看详情 ›</string>
+    <string name="action_recollect">重新采集</string>
+    <string name="toast_recollecting">正在重新采集…</string>
+
+    <!-- 退出确认 -->
+    <string name="exit_title">退出应用？</string>
+    <string name="exit_message">确定要关闭设备信息采集吗？</string>
+    <string name="action_exit">退出</string>
+
+    <!-- 实时监测 -->
+    <string name="rt_title">实时监测</string>
+    <string name="rt_battery">实时电量</string>
+    <string name="rt_cpu">CPU 频率</string>
+    <string name="rt_memory">内存</string>
+    <string name="rt_netspeed">实时网速</string>
+    <string name="rt_location">实时定位</string>
+    <string name="rt_satellites">卫星星图</string>
+    <string name="rt_current">电流</string>
+    <string name="rt_temp">温度</string>
+    <string name="rt_voltage">电压</string>
+    <string name="rt_status">状态</string>
+    <string name="rt_health">健康度</string>
+    <string name="rt_tech">电池类型</string>
+    <string name="rt_download">下行</string>
+    <string name="rt_upload">上行</string>
+    <string name="rt_latitude">纬度</string>
+    <string name="rt_longitude">经度</string>
+    <string name="rt_accuracy">精度</string>
+    <string name="rt_altitude">海拔</string>
+    <string name="rt_speed">速度</string>
+    <string name="rt_bearing">方位角</string>
+    <string name="rt_provider">定位源</string>
+    <string name="rt_sat_summary">已用 %1$d / 可见 %2$d</string>
+    <string name="rt_perm_hint">实时定位与卫星星图需要定位权限。</string>
+    <string name="rt_grant">授予权限</string>
+    <string name="rt_waiting">正在定位…</string>
+    <string name="rt_unavailable">不可用</string>
+    <string name="rt_cores">%1$d 核</string>
+    <string name="rt_cycle">循环次数</string>
+    <string name="rt_cpu_temp">CPU 温度</string>
+    <string name="rt_gpu_temp">GPU 温度</string>
+    <string name="rt_thermal">温度</string>
+    <string name="rt_updated_at">更新于 %1$s</string>
+    <string name="rt_gpu">GPU</string>
+    <string name="widget_desc">实时电量 / CPU / GPU / 内存</string>
+    <string name="rt_sensors">实时传感器</string>
 </resources>

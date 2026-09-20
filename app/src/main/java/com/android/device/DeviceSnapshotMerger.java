@@ -15,7 +15,7 @@ import org.json.JSONObject;
 public final class DeviceSnapshotMerger {
 
     private static final String TAG = "DeviceSnapshotMerger";
-    private static final long ROOT_PROBE_WAIT_MS = 3500L;
+    private static final long ROOT_PROBE_WAIT_MS = 2000L;
 
     private DeviceSnapshotMerger() {
     }

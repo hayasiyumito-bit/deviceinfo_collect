@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 旧引用兼容 -->
     <color name="primary">#1565C0</color>
     <color name="primary_dark">#0D47A1</color>
     <color name="accent">#00897B</color>
@@ -10,4 +11,42 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 风险语义色（跨主题固定） -->
+    <color name="risk_danger">#E53935</color>
+    <color name="risk_danger_container">#FFDAD6</color>
+    <color name="risk_warn">#F9A825</color>
+    <color name="risk_warn_container">#FFF3CD</color>
+    <color name="risk_safe">#2E7D32</color>
+    <color name="risk_safe_container">#C8E6C9</color>
+
+    <!-- 预设 1：Cyber Blue -->
+    <color name="cyber_primary">#1565C0</color>
+    <color name="cyber_secondary">#00897B</color>
+    <color name="cyber_tertiary">#5E35B1</color>
+
+    <!-- 预设 2：Neon Green -->
+    <color name="neon_primary">#00A152</color>
+    <color name="neon_secondary">#00838F</color>
+    <color name="neon_tertiary">#558B2F</color>
+
+    <!-- 预设 3：Sakura Pink -->
+    <color name="sakura_primary">#D81B60</color>
+    <color name="sakura_secondary">#8E24AA</color>
+    <color name="sakura_tertiary">#F4511E</color>
+
+    <!-- 预设 4：Sunset Orange -->
+    <color name="sunset_primary">#EF6C00</color>
+    <color name="sunset_secondary">#C62828</color>
+    <color name="sunset_tertiary">#AD1457</color>
+
+    <!-- 预设 5：Deep Purple -->
+    <color name="grape_primary">#6A1B9A</color>
+    <color name="grape_secondary">#3949AB</color>
+    <color name="grape_tertiary">#00838F</color>
+
+    <!-- 预设 6：Graphite（中性深灰） -->
+    <color name="graphite_primary">#455A64</color>
+    <color name="graphite_secondary">#00695C</color>
+    <color name="graphite_tertiary">#5D4037</color>
 </resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/row_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?attr/selectableItemBackground"
+    android:paddingVertical="10dp"
+    android:baselineAligned="false"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/row_label"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.42"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="14sp"
+        tools:text="Label" />
+
+    <TextView
+        android:id="@+id/row_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.58"
+        android:layout_marginStart="12dp"
+        android:gravity="end"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="Value" />
+</LinearLayout>

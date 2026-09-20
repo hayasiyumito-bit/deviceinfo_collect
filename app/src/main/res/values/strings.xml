@@ -37,4 +37,96 @@
     <string name="cat_storage">Storage info</string>
     <string name="cat_sensor">Sensor info</string>
     <string name="cat_other">Other info</string>
+
+    <!-- Bottom navigation -->
+    <string name="tab_security">Risk</string>
+    <string name="tab_system">System</string>
+    <string name="tab_hardware">Hardware</string>
+    <string name="tab_network">Network</string>
+    <string name="tab_apps">Apps</string>
+
+    <!-- Theme color -->
+    <string name="menu_theme">Theme color</string>
+    <string name="theme_title">Theme color</string>
+    <string name="theme_cyber_blue">Cyber Blue</string>
+    <string name="theme_neon_green">Neon Green</string>
+    <string name="theme_sakura_pink">Sakura Pink</string>
+    <string name="theme_sunset_orange">Sunset Orange</string>
+    <string name="theme_grape">Deep Purple</string>
+    <string name="theme_graphite">Graphite</string>
+
+    <!-- Common UI -->
+    <string name="search_hint">Search parameters</string>
+    <string name="empty_hint">No data</string>
+    <string name="card_scan_at">Scanned at %1$s</string>
+    <string name="pull_to_refresh">Pull to re-scan</string>
+
+    <!-- Risk dashboard -->
+    <string name="risk_verdict_danger">RISK DETECTED</string>
+    <string name="risk_verdict_safe">NO RISK</string>
+    <string name="risk_hits">%1$d risk signal(s)</string>
+    <string name="risk_no_hits">All checks passed</string>
+    <string name="risk_reasons_title">Risk reasons</string>
+    <string name="sec_root">Root</string>
+    <string name="sec_hook">Hook / Xposed</string>
+    <string name="sec_simulator">Emulator</string>
+    <string name="sec_environment">Environment</string>
+    <string name="sec_remediation">Remediation</string>
+    <string name="val_yes">Yes</string>
+    <string name="val_no">No</string>
+    <string name="root_rooted">Rooted</string>
+    <string name="root_clean">Not rooted</string>
+
+    <!-- Loading -->
+    <string name="loading_hint">Collecting device info…</string>
+    <string name="menu_realtime">Realtime</string>
+
+    <!-- Data expansion -->
+    <string name="card_overview">Overview</string>
+    <string name="view_detail">View detail ›</string>
+    <string name="action_recollect">Re-scan</string>
+    <string name="toast_recollecting">Re-scanning…</string>
+
+    <!-- Exit confirm -->
+    <string name="exit_title">Exit app?</string>
+    <string name="exit_message">Do you want to close Device Info Collector?</string>
+    <string name="action_exit">Exit</string>
+
+    <!-- Realtime monitor -->
+    <string name="rt_title">Realtime monitor</string>
+    <string name="rt_battery">Battery (live)</string>
+    <string name="rt_cpu">CPU frequency</string>
+    <string name="rt_memory">Memory</string>
+    <string name="rt_netspeed">Network speed</string>
+    <string name="rt_location">Location (live)</string>
+    <string name="rt_satellites">Satellites</string>
+    <string name="rt_current">Current</string>
+    <string name="rt_temp">Temperature</string>
+    <string name="rt_voltage">Voltage</string>
+    <string name="rt_status">Status</string>
+    <string name="rt_health">Health</string>
+    <string name="rt_tech">Technology</string>
+    <string name="rt_download">Download</string>
+    <string name="rt_upload">Upload</string>
+    <string name="rt_latitude">Latitude</string>
+    <string name="rt_longitude">Longitude</string>
+    <string name="rt_accuracy">Accuracy</string>
+    <string name="rt_altitude">Altitude</string>
+    <string name="rt_speed">Speed</string>
+    <string name="rt_bearing">Bearing</string>
+    <string name="rt_provider">Provider</string>
+    <string name="rt_sat_summary">Used %1$d / Visible %2$d</string>
+    <string name="rt_perm_hint">Location permission is required for live location and the satellite sky map.</string>
+    <string name="rt_grant">Grant permission</string>
+    <string name="rt_waiting">Waiting for fix…</string>
+    <string name="rt_unavailable">N/A</string>
+    <string name="rt_cores">%1$d cores</string>
+    <string name="rt_cycle">Cycle count</string>
+    <string name="rt_cpu_temp">CPU temp</string>
+    <string name="rt_gpu_temp">GPU temp</string>
+    <string name="rt_thermal">Temperature</string>
+    <string name="rt_updated_at">Updated %1$s</string>
+    <string name="rt_gpu">GPU</string>
+    <string name="widget_desc">Live battery / CPU / GPU / memory</string>
+    <string name="rt_sensors">Sensors (live)</string>
 </resources>

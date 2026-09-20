@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/colorBackground"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorSurface"
+        app:title="@string/rt_title"
+        app:titleTextColor="?attr/colorOnSurface"
+        app:subtitleTextColor="?attr/colorOnSurfaceVariant"
+        app:navigationIcon="@drawable/ic_back" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 电量 -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_battery" />
+                    <TextView android:id="@+id/tv_battery_level" style="@style/RtBigNumber" tools:text="78%" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/pb_battery" style="@style/RtBar" />
+                    <LinearLayout android:id="@+id/battery_detail" style="@style/RtRows" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- CPU -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_cpu" />
+                    <TextView android:id="@+id/tv_cpu" style="@style/RtBigNumber" tools:text="2.8 GHz" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/pb_cpu" style="@style/RtBar" />
+                    <LinearLayout android:id="@+id/cpu_detail" style="@style/RtRows" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 内存 -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_memory" />
+                    <TextView android:id="@+id/tv_mem" style="@style/RtBigNumber" android:textSize="22sp" tools:text="5.2 / 12 GB" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/pb_mem" style="@style/RtBar" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- GPU -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_gpu" />
+                    <TextView android:id="@+id/tv_gpu" style="@style/RtBigNumber" tools:text="13%" />
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/pb_gpu" style="@style/RtBar" />
+                    <LinearLayout android:id="@+id/thermal_detail" style="@style/RtRows" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 网速 -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_netspeed" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:layout_marginTop="8dp">
+                        <TextView android:id="@+id/tv_download" android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center" android:textSize="18sp" android:textStyle="bold"
+                            android:textColor="?attr/colorPrimary" tools:text="↓ 1.2 MB/s" />
+                        <TextView android:id="@+id/tv_upload" android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center" android:textSize="18sp" android:textStyle="bold"
+                            android:textColor="?attr/colorSecondary" tools:text="↑ 0.3 MB/s" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 实时传感器 -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_sensors" />
+                    <LinearLayout android:id="@+id/sensor_detail" style="@style/RtRows" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 定位 -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_location" />
+                    <TextView android:id="@+id/tv_perm_hint" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                        android:text="@string/rt_perm_hint" android:textColor="?attr/colorOnSurfaceVariant"
+                        android:visibility="gone" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_grant"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:text="@string/rt_grant" android:visibility="gone" />
+                    <LinearLayout android:id="@+id/location_detail" style="@style/RtRows" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 卫星星图 -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_satellites" />
+                    <TextView android:id="@+id/tv_sat_summary" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                        android:textColor="?attr/colorOnSurfaceVariant" tools:text="Used 8 / Visible 20" />
+                    <com.android.device.ui.SatelliteView android:id="@+id/satellite_view"
+                        android:layout_width="match_parent" android:layout_height="320dp"
+                        android:layout_marginTop="8dp" />
+
+                    <com.google.android.material.internal.FlowLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp">
+                        <TextView style="@style/RtLegend" android:text="\u25CF GPS" android:textColor="#1565C0" />
+                        <TextView style="@style/RtLegend" android:text="\u25CF BeiDou" android:textColor="#FB8C00" />
+                        <TextView style="@style/RtLegend" android:text="\u25CF GLONASS" android:textColor="#E53935" />
+                        <TextView style="@style/RtLegend" android:text="\u25CF Galileo" android:textColor="#2E7D32" />
+                        <TextView style="@style/RtLegend" android:text="\u25CF QZSS" android:textColor="#8E24AA" />
+                        <TextView style="@style/RtLegend" android:text="\u25CF SBAS" android:textColor="#00838F" />
+                    </com.google.android.material.internal.FlowLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

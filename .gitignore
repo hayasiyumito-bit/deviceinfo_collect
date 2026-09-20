@@ -64,3 +64,4 @@ venv/
 
 # OS
 Thumbs.db
+/app/release/
