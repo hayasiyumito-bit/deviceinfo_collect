@@ -48,9 +48,36 @@ public final class SpoofProbe {
         JsonPut.put(o, "simOperatorName", safe(() -> tm == null ? "" : tm.getSimOperatorName()));
         JsonPut.put(o, "simCountryIso", safe(() -> tm == null ? "" : tm.getSimCountryIso()));
 
-        // ---- 位置（单次 getLastKnownLocation，遍历 provider，不轮询/不阻塞） ----
-        JsonPut.put(o, "location", location(context));
+        // ---- 位置（AOSP LocationManager：单次 getLastKnownLocation，遍历 provider，不轮询/不阻塞） ----
+        JsonPut.put(o, "location_LocationManager", location(context));
+        // ---- 位置（GMS FusedLocationProviderClient：Google Maps 等真机 App 实际走的路径） ----
+        JsonPut.put(o, "location_GmsFused", fusedLocation(context));
         return o;
+    }
+
+    /** GMS Fused 定位快照：getLastLocation() 带超时阻塞，读不到不阻塞主流程。 */
+    @SuppressLint("MissingPermission")
+    private static JSONObject fusedLocation(Context context) {
+        JSONObject loc = new JSONObject();
+        try {
+            com.google.android.gms.location.FusedLocationProviderClient client =
+                    com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(context);
+            android.location.Location l = com.google.android.gms.tasks.Tasks.await(
+                    client.getLastLocation(), 4, java.util.concurrent.TimeUnit.SECONDS);
+            if (l != null) {
+                JsonPut.put(loc, "provider", l.getProvider());
+                JsonPut.put(loc, "latitude", l.getLatitude());
+                JsonPut.put(loc, "longitude", l.getLongitude());
+                JsonPut.put(loc, "accuracy", l.getAccuracy());
+            } else {
+                JsonPut.put(loc, "latitude", "");
+                JsonPut.put(loc, "longitude", "");
+                JsonPut.put(loc, "note", "GMS getLastLocation returned null");
+            }
+        } catch (Throwable t) {
+            JsonPut.put(loc, "error", t.getClass().getSimpleName() + ":" + t.getMessage());
+        }
+        return loc;
     }
 
     // ---- 位置：单次快照，最多遍历所有 provider 取一个非空 lastKnownLocation ----
