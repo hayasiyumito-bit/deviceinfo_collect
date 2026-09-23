@@ -164,6 +164,18 @@ public final class HideDetectionProbe {
                     "Hook injection library detected (/proc/self/maps): ")
                     + join(rawHits));
         }
+        // 结构信号：rwx 可写可执行页（inline-hook 补丁 / 注入蹦床），改名藏不住
+        if (probe.optBoolean("patched", false)) {
+            int rwxFile = probe.optInt("rwxFile", 0);
+            int rwxAnon = probe.optInt("rwxAnon", 0);
+            reasons.put(com.android.device.i18n.AppLocale.tr(
+                    "检测到 rwx 可写可执行内存（违反 W^X，疑似 inline-hook 补丁/注入蹦床）：文件页 ",
+                    "rwx writable-executable memory detected (W^X violation, suspected inline-hook patch/injection trampoline): file-backed ")
+                    + rwxFile
+                    + com.android.device.i18n.AppLocale.tr(" 处，匿名 ", ", anonymous ")
+                    + rwxAnon
+                    + com.android.device.i18n.AppLocale.tr(" 处", ""));
+        }
         return probe;
     }
 

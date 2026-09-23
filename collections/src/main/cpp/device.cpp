@@ -524,6 +524,29 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
         fopenHas[i] = fopenBuf && (fopenN > 0) && (strstr(fopenBuf, tokens[i]) != nullptr);
     }
 
+    // 结构信号：扫 inline-svc 真 maps 里的 rwx(可写可执行)页——违反 W^X。
+    // 文件映射的系统库本应 r-xp，出现 rwxp = 被 inline-hook 打了补丁(shadowhook)；
+    // 匿名 rwx = 注入的蹦床/跳板。改名藏不住权限位，是 round9/10 之后仍暴露的破绽。
+    int rwxAnon = 0, rwxFile = 0;
+    for (const char *p = rawBuf; p && *p;) {
+        const char *eol = strchr(p, '\n');
+        size_t len = eol ? (size_t) (eol - p) : strlen(p);
+        const char *sp = (const char *) memchr(p, ' ', len);
+        if (sp && (size_t) (sp - p) + 4 < len) {
+            const char *perms = sp + 1;  // "rwxp"
+            if (perms[1] == 'w' && perms[2] == 'x') {
+                bool fileBacked = false;
+                for (const char *q = perms; q < p + len; q++) {
+                    if (*q == '/') { fileBacked = true; break; }
+                }
+                if (fileBacked) rwxFile++; else rwxAnon++;
+            }
+        }
+        if (!eol) break;
+        p = eol + 1;
+    }
+    bool patched = (rwxFile > 0) || (rwxAnon > 0);
+
     off += snprintf(json + off, sizeof(json) - off, "\"rawHits\":[");
     bool first = true;
     for (int i = 0; tokens[i]; i++) {
@@ -563,8 +586,10 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
             concealed = true;
         }
     }
-    snprintf(json + off, sizeof(json) - off, "],\"hooked\":%s,\"concealed\":%s}",
-             hooked ? "true" : "false", concealed ? "true" : "false");
+    snprintf(json + off, sizeof(json) - off,
+             "],\"rwxAnon\":%d,\"rwxFile\":%d,\"patched\":%s,\"hooked\":%s,\"concealed\":%s}",
+             rwxAnon, rwxFile, patched ? "true" : "false",
+             (hooked || patched) ? "true" : "false", concealed ? "true" : "false");
 
     free(rawBuf);
     free(libcBuf);
