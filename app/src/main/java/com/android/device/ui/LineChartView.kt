@@ -93,21 +93,21 @@ class LineChartView @JvmOverloads constructor(
         legendPaint.color = onSurface
         hintPaint.color = onSurfaceVar
 
-        val legendH = dp(20f)
-        val padTop = legendH + dp(6f)
         val padBottom = dp(6f)
         val padRight = dp(6f)
         val padLeft = dp(34f) // 给 Y 轴数值留位
 
-        // 图例（顶部一行）
-        var lx = padLeft
-        val ly = dp(13f)
+        // 图例：每个系列各占一行（竖排），避免多系列横排时文字互相遮挡
+        val legendLineH = dp(16f)
+        val legendH = legendLineH * series.size
+        val padTop = legendH + dp(6f)
+        var itemY = dp(12f)
         for (s in series.values) {
             dotPaint.color = s.color
-            canvas.drawCircle(lx + dp(4f), ly - dp(3f), dp(4f), dotPaint)
-            val txt = s.label + (if (!s.latest.isNaN()) "  " + formatter(s.latest) + unit else "  --")
-            canvas.drawText(txt, lx + dp(12f), ly, legendPaint)
-            lx += dp(12f) + legendPaint.measureText(txt) + dp(14f)
+            canvas.drawCircle(padLeft + dp(4f), itemY - dp(3.5f), dp(4f), dotPaint)
+            val txt = s.label + (if (!s.latest.isNaN()) "   " + formatter(s.latest) + unit else "   --")
+            canvas.drawText(txt, padLeft + dp(13f), itemY, legendPaint)
+            itemY += legendLineH
         }
 
         val plotL = padLeft

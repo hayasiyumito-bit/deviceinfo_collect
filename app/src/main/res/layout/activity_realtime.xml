@@ -36,7 +36,7 @@
                     <com.android.device.ui.LineChartView
                         android:id="@+id/chart_temp"
                         android:layout_width="match_parent"
-                        android:layout_height="160dp"
+                        android:layout_height="185dp"
                         android:layout_marginTop="6dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -48,7 +48,7 @@
                     <com.android.device.ui.LineChartView
                         android:id="@+id/chart_freq"
                         android:layout_width="match_parent"
-                        android:layout_height="160dp"
+                        android:layout_height="185dp"
                         android:layout_marginTop="6dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
