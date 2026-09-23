@@ -351,16 +351,37 @@ class RealtimeActivity : AppCompatActivity(), SensorEventListener {
         ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED
 
+    /**
+     * 复用已有行，只在文字变化时更新——避免每次轮询 removeAllViews + inflate 造成的
+     * 反复分配/GC 与整表重排（1.5s 一次、多容器叠加时开销明显）。
+     * 行内两个 TextView 缓存在 row.tag（[RowHolder]），复用时不再 findViewById。
+     */
     private fun fillRows(container: LinearLayout, pairs: List<Pair<String, String>>) {
-        container.removeAllViews()
         val inflater = LayoutInflater.from(container.context)
-        for ((label, value) in pairs) {
-            val row = inflater.inflate(R.layout.item_info_row, container, false)
-            row.findViewById<TextView>(R.id.row_label).text = label
-            row.findViewById<TextView>(R.id.row_value).text = value
-            container.addView(row)
+        for (i in pairs.indices) {
+            val (label, value) = pairs[i]
+            val holder = if (i < container.childCount) {
+                container.getChildAt(i).tag as RowHolder
+            } else {
+                val row = inflater.inflate(R.layout.item_info_row, container, false)
+                val h = RowHolder(
+                    row.findViewById(R.id.row_label),
+                    row.findViewById(R.id.row_value),
+                )
+                row.tag = h
+                container.addView(row)
+                h
+            }
+            if (holder.label.text?.toString() != label) holder.label.text = label
+            if (holder.value.text?.toString() != value) holder.value.text = value
+        }
+        // 移除多余的旧行（本次比上次少时）
+        while (container.childCount > pairs.size) {
+            container.removeViewAt(container.childCount - 1)
         }
     }
+
+    private class RowHolder(val label: TextView, val value: TextView)
 
     private fun fmtSpeed(bps: Long): String = when {
         bps >= 1048576 -> "%.2f MB/s".format(bps / 1048576.0)
