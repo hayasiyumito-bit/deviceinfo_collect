@@ -495,6 +495,20 @@ static long yh_read_region(const char *path, long offset, char *buf, long n) {
 #endif
 }
 
+// round14 反制 (A′): 手写字节比较，绝不走 libc memcmp/bcmp。
+// 对手（YumyHook）已在同进程 inline-hook 了 memcmp，令其对 libc 代码区大块比较恒返回「相等」，
+// 从而抹掉 textPatched。这里改用 volatile 逐字节 XOR 累加：
+//  ① volatile 阻止编译器把循环折叠(loop-idiom)回 memcmp/bcmp 调用——否则又会被那把 hook 拦截；
+//  ② 无早退、纯累加，不是任何可识别的比较惯用式；
+//  ③ 全程只有 load/xor/or，无 PLT 调用，落在对手 hook 射程之外。
+static bool yh_bytes_differ(const void *pa, const void *pb, long n) {
+    const volatile unsigned char *a = (const volatile unsigned char *) pa;
+    const volatile unsigned char *b = (const volatile unsigned char *) pb;
+    unsigned int diff = 0;
+    for (long i = 0; i < n; i++) diff |= (unsigned int) (a[i] ^ b[i]);
+    return diff != 0;
+}
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jclass clazz) {
@@ -603,7 +617,8 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
                 if (fbuf) {
                     // inline-svc 读磁盘原文，绕过对手对 .so open/read 的潜在 hook
                     long got = yh_read_region(path, (long) o2, fbuf, n);
-                    if (got > 0 && memcmp(fbuf, reinterpret_cast<void *>(s2), (size_t) got) != 0) {
+                    // round14: 用手写 volatile 比较取代 memcmp，绕过对手对 memcmp 的 A′ 劫持
+                    if (got > 0 && yh_bytes_differ(fbuf, reinterpret_cast<void *>(s2), got)) {
                         textPatched++;
                     }
                     free(fbuf);
