@@ -165,9 +165,9 @@ public final class HideDetectionProbe {
                     + join(rawHits));
         }
         // 结构信号：rwx 可写可执行页（inline-hook 补丁 / 注入蹦床），改名藏不住
-        if (probe.optBoolean("patched", false)) {
-            int rwxFile = probe.optInt("rwxFile", 0);
-            int rwxAnon = probe.optInt("rwxAnon", 0);
+        int rwxFile = probe.optInt("rwxFile", 0);
+        int rwxAnon = probe.optInt("rwxAnon", 0);
+        if (rwxFile > 0 || rwxAnon > 0) {
             reasons.put(com.android.device.i18n.AppLocale.tr(
                     "检测到 rwx 可写可执行内存（违反 W^X，疑似 inline-hook 补丁/注入蹦床）：文件页 ",
                     "rwx writable-executable memory detected (W^X violation, suspected inline-hook patch/injection trampoline): file-backed ")
@@ -175,6 +175,15 @@ public final class HideDetectionProbe {
                     + com.android.device.i18n.AppLocale.tr(" 处，匿名 ", ", anonymous ")
                     + rwxAnon
                     + com.android.device.i18n.AppLocale.tr(" 处", ""));
+        }
+        // 代码完整性：libc/libcutils 内存字节 ≠ 磁盘原文 = 被 inline-patch，权限位改回 r-x 也藏不住
+        int textPatched = probe.optInt("textPatched", 0);
+        if (textPatched > 0) {
+            reasons.put(com.android.device.i18n.AppLocale.tr(
+                    "检测到 libc 代码被篡改（内存字节与磁盘 .so 原文不一致，inline-hook 补丁），命中 ",
+                    "libc code tampering detected (in-memory bytes differ from on-disk .so, inline-hook patch), matched ")
+                    + textPatched
+                    + com.android.device.i18n.AppLocale.tr(" 个代码段", " code segment(s)"));
         }
         return probe;
     }

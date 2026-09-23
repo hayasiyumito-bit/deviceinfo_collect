@@ -545,7 +545,47 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
         if (!eol) break;
         p = eol + 1;
     }
-    bool patched = (rwxFile > 0) || (rwxAnon > 0);
+    // round12：代码完整性核对——把 libc/libcutils 的**可执行代码页**在内存里的字节
+    // 与磁盘 .so 原文逐字节对比。shadowhook 的 inline 补丁改的是函数字节(不是权限位)，
+    // 所以即便对手把页权限 mprotect 回 r-x(躲过 rwx 探针)，被改的字节仍在→照样暴露。
+    // arm64 PIE 的 .text 加载时不重定位，故干净时内存==磁盘，出现差异即被 patch。
+    int textPatched = 0;
+    for (const char *p = rawBuf; p && *p;) {
+        const char *eol = strchr(p, '\n');
+        size_t len = eol ? (size_t) (eol - p) : strlen(p);
+        char lb[512];
+        size_t cl = len < sizeof(lb) - 1 ? len : sizeof(lb) - 1;
+        memcpy(lb, p, cl);
+        lb[cl] = '\0';
+        unsigned long s2 = 0, e2 = 0, o2 = 0;
+        char pm[8] = {0};
+        if (sscanf(lb, "%lx-%lx %7s %lx", &s2, &e2, pm, &o2) == 4 &&
+            pm[0] == 'r' && pm[2] == 'x' && e2 > s2) {
+            const char *path = strchr(lb, '/');
+            if (path && (strstr(path, "/libc.so") || strstr(path, "/libcutils.so"))) {
+                int fd = open(path, O_RDONLY | O_CLOEXEC);
+                if (fd >= 0) {
+                    size_t n = e2 - s2;
+                    if (n > 2u * 1024 * 1024) n = 2u * 1024 * 1024;
+                    char *fbuf = (char *) malloc(n);
+                    if (fbuf) {
+                        lseek(fd, (off_t) o2, SEEK_SET);
+                        size_t got = 0;
+                        ssize_t r;
+                        while (got < n && (r = read(fd, fbuf + got, n - got)) > 0) got += r;
+                        if (got > 0 && memcmp(fbuf, reinterpret_cast<void *>(s2), got) != 0) {
+                            textPatched++;
+                        }
+                        free(fbuf);
+                    }
+                    close(fd);
+                }
+            }
+        }
+        if (!eol) break;
+        p = eol + 1;
+    }
+    bool patched = (rwxFile > 0) || (rwxAnon > 0) || (textPatched > 0);
 
     off += snprintf(json + off, sizeof(json) - off, "\"rawHits\":[");
     bool first = true;
@@ -587,8 +627,8 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
         }
     }
     snprintf(json + off, sizeof(json) - off,
-             "],\"rwxAnon\":%d,\"rwxFile\":%d,\"patched\":%s,\"hooked\":%s,\"concealed\":%s}",
-             rwxAnon, rwxFile, patched ? "true" : "false",
+             "],\"rwxAnon\":%d,\"rwxFile\":%d,\"textPatched\":%d,\"patched\":%s,\"hooked\":%s,\"concealed\":%s}",
+             rwxAnon, rwxFile, textPatched, patched ? "true" : "false",
              (hooked || patched) ? "true" : "false", concealed ? "true" : "false");
 
     free(rawBuf);
