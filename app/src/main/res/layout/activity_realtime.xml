@@ -29,6 +29,30 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- 温度实时折线图 (CPU / GPU / 电池) -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_chart_temp" />
+                    <com.android.device.ui.LineChartView
+                        android:id="@+id/chart_temp"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        android:layout_marginTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 频率实时折线图 (CPU / GPU) -->
+            <com.google.android.material.card.MaterialCardView style="@style/RtCard">
+                <LinearLayout style="@style/RtCardInner">
+                    <TextView style="@style/RtTitle" android:text="@string/rt_chart_freq" />
+                    <com.android.device.ui.LineChartView
+                        android:id="@+id/chart_freq"
+                        android:layout_width="match_parent"
+                        android:layout_height="160dp"
+                        android:layout_marginTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- 电量 -->
             <com.google.android.material.card.MaterialCardView style="@style/RtCard">
                 <LinearLayout style="@style/RtCardInner">

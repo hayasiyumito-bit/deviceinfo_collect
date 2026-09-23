@@ -129,4 +129,6 @@
     <string name="rt_gpu">GPU</string>
     <string name="widget_desc">Live battery / CPU / GPU / memory</string>
     <string name="rt_sensors">Sensors (live)</string>
+    <string name="rt_chart_temp">Temperature (real-time)</string>
+    <string name="rt_chart_freq">Frequency (real-time)</string>
 </resources>

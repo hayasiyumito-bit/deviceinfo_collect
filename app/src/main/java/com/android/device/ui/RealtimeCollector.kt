@@ -41,6 +41,7 @@ class RealtimeCollector(context: Context) {
         val cpuTemp: Float?,     // CPU 最高温度 ℃
         val gpuTemp: Float?,     // GPU 温度 ℃
         val gpuLoad: Float?,     // GPU 负载 0..1，null 表示不可读
+        val gpuFreqKhz: Int?,    // GPU 当前频率(kHz)，null 表示不可读
         val cpuUsage: Float?,    // 0..1，null 表示不可读（高版本 SELinux 常挡）
         val coreCount: Int,
         val curFreqKhz: IntArray?,  // 各核当前频率(kHz)，null 表示不可读
@@ -81,6 +82,7 @@ class RealtimeCollector(context: Context) {
             cpuTemp = cpuTemp,
             gpuTemp = gpuTemp,
             gpuLoad = readGpuLoad(),
+            gpuFreqKhz = readGpuFreq(),
             cpuUsage = readCpuUsage(),
             coreCount = Runtime.getRuntime().availableProcessors(),
             curFreqKhz = readCurFreqs(),
@@ -138,25 +140,63 @@ class RealtimeCollector(context: Context) {
         return if (total > 0) (busy.toFloat() / total).coerceIn(0f, 1f) else 0f
     }
 
+    /** GPU 当前频率(kHz)：遍历多种常见节点(Adreno/Mali)，单位归一到 kHz；全读不到返回 null。 */
+    private fun readGpuFreq(): Int? {
+        // (path, 原始单位→kHz 的换算)
+        val candidatesHz = listOf(
+            "/sys/class/kgsl/kgsl-3d0/devfreq/cur_freq", // Adreno
+            "/sys/class/kgsl/kgsl-3d0/gpuclk",
+            "/sys/class/devfreq/gpufreq/cur_freq",
+            "/sys/class/devfreq/gpu/cur_freq",
+            "/sys/class/devfreq/*.mali/cur_freq",        // Mali (通配，见下 glob 处理)
+            "/sys/kernel/gpu/gpu_clock"                  // 部分为 MHz
+        )
+        for (p in candidatesHz) {
+            val actual = if (p.contains("*")) expandGlobFirst(p) ?: continue else p
+            val v = readTextFile(actual)?.toLongOrNull() ?: continue
+            if (v <= 0) continue
+            // >100000 视为 Hz(→/1000)，否则视为 MHz(→*1000)
+            return if (v > 100_000) (v / 1000).toInt() else (v * 1000).toInt()
+        }
+        return null
+    }
+
+    /** 展开形如 /a/b/&#42;.mali/cur_freq 的通配路径，返回第一个存在的实际路径。 */
+    private fun expandGlobFirst(pattern: String): String? {
+        val star = pattern.indexOf('*')
+        val dirEnd = pattern.lastIndexOf('/', star)
+        val nextSlash = pattern.indexOf('/', star)
+        if (dirEnd < 0 || nextSlash < 0) return null
+        val dir = java.io.File(pattern.substring(0, dirEnd))
+        val namePat = pattern.substring(dirEnd + 1, nextSlash) // 如 "*.mali"
+        val suffix = pattern.substring(nextSlash)              // 如 "/cur_freq"
+        val regex = Regex("^" + Regex.escape(namePat).replace("\\*", ".*") + "$")
+        val match = try { dir.listFiles()?.firstOrNull { regex.matches(it.name) } } catch (e: Exception) { null }
+        return match?.let { it.absolutePath + suffix }
+    }
+
     /** 遍历 thermal_zone，按 type 归类取 CPU / GPU 最高温(℃)。 */
     private fun readThermal(): Pair<Float?, Float?> {
         var cpu: Float? = null
         var gpu: Float? = null
+        var chip: Float? = null // 无独立 cpu 分区时的兜底（SoC/AP 芯片温度）
         for (i in 0 until 60) {
             val typePath = "/sys/class/thermal/thermal_zone$i/type"
             val type = readTextFile(typePath) ?: continue
             val t = type.lowercase()
-            val relevant = t.contains("cpu") || t.contains("gpu")
-            if (!relevant) continue
+            val isCpu = t.contains("cpu")
+            val isGpu = t.contains("gpu")
+            val isChip = t.contains("soc") || t.contains("tsens") || t.startsWith("ap_") || t.contains("apc")
+            if (!isCpu && !isGpu && !isChip) continue
             val raw = readTextFile("/sys/class/thermal/thermal_zone$i/temp")?.toLongOrNull() ?: continue
             val celsius = if (raw > 1000) raw / 1000f else raw.toFloat()
-            if (t.contains("gpu")) {
-                if (gpu == null || celsius > gpu!!) gpu = celsius
-            } else {
-                if (cpu == null || celsius > cpu!!) cpu = celsius
+            when {
+                isGpu -> if (gpu == null || celsius > gpu!!) gpu = celsius
+                isCpu -> if (cpu == null || celsius > cpu!!) cpu = celsius
+                else -> if (chip == null || celsius > chip!!) chip = celsius
             }
         }
-        return cpu to gpu
+        return (cpu ?: chip) to gpu
     }
 
     private fun readTextFile(path: String): String? = try {

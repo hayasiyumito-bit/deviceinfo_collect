@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.device.R
 import com.android.device.databinding.ActivityRealtimeBinding
+import android.graphics.Color
 import com.android.device.i18n.AppLocale
 import java.util.concurrent.Executors
 
@@ -96,6 +97,7 @@ class RealtimeActivity : AppCompatActivity(), SensorEventListener {
 
         binding.toolbar.setNavigationOnClickListener { finish() }
         collector = RealtimeCollector(this)
+        configureCharts()
         locationManager = getSystemService(LOCATION_SERVICE) as? LocationManager
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         binding.btnGrant.setOnClickListener {
@@ -266,6 +268,34 @@ class RealtimeActivity : AppCompatActivity(), SensorEventListener {
 
         binding.tvDownload.text = "↓ " + fmtSpeed(rt.rxSpeed)
         binding.tvUpload.text = "↑ " + fmtSpeed(rt.txSpeed)
+
+        // 实时折线图：温度(CPU/GPU/电池) 与 频率(CPU/GPU)
+        binding.chartTemp.push(
+            mapOf("cpu" to rt.cpuTemp, "gpu" to rt.gpuTemp, "bat" to rt.temperature)
+        )
+        val cpuMhz = rt.curFreqKhz?.maxOrNull()?.let { if (it > 0) it / 1000f else null }
+        val gpuMhz = rt.gpuFreqKhz?.let { if (it > 0) it / 1000f else null }
+        binding.chartFreq.push(mapOf("cpu" to cpuMhz, "gpu" to gpuMhz))
+    }
+
+    private fun configureCharts() {
+        binding.chartTemp.configure(
+            listOf(
+                Triple("cpu", AppLocale.tr("CPU 温度", "CPU temp"), Color.parseColor("#FB8C00")),
+                Triple("gpu", AppLocale.tr("GPU 温度", "GPU temp"), Color.parseColor("#7E57C2")),
+                Triple("bat", AppLocale.tr("电池温度", "Battery"), Color.parseColor("#26A69A")),
+            ),
+            unit = " ℃",
+            formatter = { "%.1f".format(it) },
+        )
+        binding.chartFreq.configure(
+            listOf(
+                Triple("cpu", AppLocale.tr("CPU 频率", "CPU freq"), Color.parseColor("#1E88E5")),
+                Triple("gpu", AppLocale.tr("GPU 频率", "GPU freq"), Color.parseColor("#7E57C2")),
+            ),
+            unit = " MHz",
+            formatter = { "%.0f".format(it) },
+        )
     }
 
     private fun updateLocation(loc: Location) {

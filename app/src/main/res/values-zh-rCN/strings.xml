@@ -129,4 +129,6 @@
     <string name="rt_gpu">GPU</string>
     <string name="widget_desc">实时电量 / CPU / GPU / 内存</string>
     <string name="rt_sensors">实时传感器</string>
+    <string name="rt_chart_temp">温度实时曲线</string>
+    <string name="rt_chart_freq">频率实时曲线</string>
 </resources>
