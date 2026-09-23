@@ -461,6 +461,40 @@ static int yh_count_lines(const char *s) {
     return c;
 }
 
+// 用 inline svc 读文件 [offset, offset+n) 区间（openat + pread64 + close），
+// 绕过对手可能对 libc open/read 的 hook（防止其回喂"已打补丁"的 .so 字节使核对失效）。
+// 返回读到的字节数；非 aarch64 退化为 libc open+pread。
+#ifdef YH_HAVE_SVC
+#define YH_NR_PREAD64 67
+#endif
+static long yh_read_region(const char *path, long offset, char *buf, long n) {
+#ifdef YH_HAVE_SVC
+    int fd = (int) yh_svc(YH_NR_OPENAT, (long) -100, (long) path,
+                          (long) (O_RDONLY | O_CLOEXEC), 0);
+    if (fd < 0) return -1;
+    long got = 0;
+    while (got < n) {
+        long r = yh_svc(YH_NR_PREAD64, fd, (long) (buf + got), (long) (n - got),
+                        (long) (offset + got));
+        if (r <= 0) break;
+        got += r;
+    }
+    yh_svc(YH_NR_CLOSE, fd, 0, 0, 0);
+    return got;
+#else
+    int fd = open(path, O_RDONLY | O_CLOEXEC);
+    if (fd < 0) return -1;
+    long got = 0;
+    while (got < n) {
+        ssize_t r = pread(fd, buf + got, (size_t) (n - got), (off_t) (offset + got));
+        if (r <= 0) break;
+        got += r;
+    }
+    close(fd);
+    return got;
+#endif
+}
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jclass clazz) {
@@ -563,22 +597,16 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
             pm[0] == 'r' && pm[2] == 'x' && e2 > s2) {
             const char *path = strchr(lb, '/');
             if (path && (strstr(path, "/libc.so") || strstr(path, "/libcutils.so"))) {
-                int fd = open(path, O_RDONLY | O_CLOEXEC);
-                if (fd >= 0) {
-                    size_t n = e2 - s2;
-                    if (n > 2u * 1024 * 1024) n = 2u * 1024 * 1024;
-                    char *fbuf = (char *) malloc(n);
-                    if (fbuf) {
-                        lseek(fd, (off_t) o2, SEEK_SET);
-                        size_t got = 0;
-                        ssize_t r;
-                        while (got < n && (r = read(fd, fbuf + got, n - got)) > 0) got += r;
-                        if (got > 0 && memcmp(fbuf, reinterpret_cast<void *>(s2), got) != 0) {
-                            textPatched++;
-                        }
-                        free(fbuf);
+                long n = (long) (e2 - s2);
+                if (n > 2L * 1024 * 1024) n = 2L * 1024 * 1024;
+                char *fbuf = (char *) malloc((size_t) n);
+                if (fbuf) {
+                    // inline-svc 读磁盘原文，绕过对手对 .so open/read 的潜在 hook
+                    long got = yh_read_region(path, (long) o2, fbuf, n);
+                    if (got > 0 && memcmp(fbuf, reinterpret_cast<void *>(s2), (size_t) got) != 0) {
+                        textPatched++;
                     }
-                    close(fd);
+                    free(fbuf);
                 }
             }
         }
