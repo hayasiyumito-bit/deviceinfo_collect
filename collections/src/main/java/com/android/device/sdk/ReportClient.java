@@ -1,6 +1,5 @@
 package com.android.device.sdk;
 
-import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -71,12 +70,10 @@ public final class ReportClient {
             int code = conn.getResponseCode();
             boolean ok = code >= 200 && code < 300;
             String resp = readStream(ok ? conn.getInputStream() : conn.getErrorStream());
-            if (!ok) {
-                Log.w(TAG, "report failed http=" + code + " resp=" + resp);
-            }
+            // 后台静默上报：失败(含超时)不打日志，能报则报、报不了就算了。
             return new Result(ok, code, resp);
         } catch (Exception e) {
-            Log.w(TAG, "report error", e);
+            // 静默：连接超时/断网等异常不打日志，避免 logcat 噪声。
             return new Result(false, -1, e.getClass().getSimpleName() + ": " + e.getMessage());
         } finally {
             if (conn != null) {
