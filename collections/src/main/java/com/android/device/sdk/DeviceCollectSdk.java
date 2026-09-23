@@ -101,6 +101,10 @@ public final class DeviceCollectSdk {
             envelope.put("device_id", deviceId(context));
             envelope.put("app_package", config.appPackage());
             envelope.put("app_version", config.appVersion());
+            // 上报来源；为空则不写该键，服务端按 app_package 回退推断（兼容旧包）。
+            if (config.source() != null && !config.source().isEmpty()) {
+                envelope.put("source", config.source());
+            }
             envelope.put("collected_at", payload.optLong("collectedAt", System.currentTimeMillis()));
             envelope.put("any_risk", payload.optBoolean("anyRisk", false));
             envelope.put("risk_reasons", payload.optJSONArray("anyRiskReasons"));

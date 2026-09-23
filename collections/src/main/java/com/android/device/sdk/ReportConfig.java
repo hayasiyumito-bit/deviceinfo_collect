@@ -19,6 +19,7 @@ public final class ReportConfig {
     private String reportPath = "/api/v1/report";
     private String appPackage;
     private String appVersion;
+    private String source;
     private boolean gzip = true;
     private boolean includeRisk = false;
     private int connectTimeoutMs = 10_000;
@@ -42,6 +43,14 @@ public final class ReportConfig {
     public ReportConfig reportPath(String path) { this.reportPath = path; return this; }
     public ReportConfig appPackage(String pkg) { this.appPackage = pkg; return this; }
     public ReportConfig appVersion(String ver) { this.appVersion = ver; return this; }
+
+    /**
+     * 上报来源标识，供服务端区分同一台设备的不同上报方：
+     * {@code "yumyhook"}（管理器 App，通常采集到真实/未伪装值）与
+     * {@code "collect_app"}（采集 App com.android.device，在 Hook 作用域内采集到伪装后值）。
+     * 不设置时字段缺省，服务端按 {@code app_package} 回退推断。
+     */
+    public ReportConfig source(String source) { this.source = source; return this; }
     public ReportConfig gzip(boolean enabled) { this.gzip = enabled; return this; }
 
     /**
@@ -58,6 +67,7 @@ public final class ReportConfig {
     public String apiKey() { return apiKey; }
     public String appPackage() { return appPackage; }
     public String appVersion() { return appVersion; }
+    public String source() { return source; }
     public boolean gzip() { return gzip; }
     public boolean includeRisk() { return includeRisk; }
     public int connectTimeoutMs() { return connectTimeoutMs; }
