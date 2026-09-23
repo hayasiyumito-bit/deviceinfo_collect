@@ -484,6 +484,23 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
     long rawN = yh_read_file_all("/proc/self/maps", rawBuf, CAP, svcUsed);
     long libcN = yh_read_file_all("/proc/self/maps", libcBuf, CAP, false);
 
+    // 第三路：fopen（反检测模块最常拦截的经典 API），诊断哪条 libc 路径被过滤
+    char *fopenBuf = (char *) malloc(CAP);
+    long fopenN = -1;
+    if (fopenBuf) {
+        FILE *fp = fopen("/proc/self/maps", "r");
+        if (fp) {
+            long t = 0;
+            size_t r;
+            while (t < CAP - 1 && (r = fread(fopenBuf + t, 1, (size_t) (CAP - 1 - t), fp)) > 0) t += r;
+            fopenBuf[t > 0 ? t : 0] = '\0';
+            fopenN = t;
+            fclose(fp);
+        } else {
+            fopenBuf[0] = '\0';
+        }
+    }
+
     // 注入指纹：YumyHook 原生库 / shadowhook 引擎 / LSPosed / Zygisk / Riru / Xposed
     static const char *tokens[] = {
             "libyumyhook_native.so", "yumyhook_native", "libshadowhook.so",
@@ -494,16 +511,17 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
 
     char json[8192];
     int off = snprintf(json, sizeof(json),
-                       "{\"arch\":\"%s\",\"svcBypass\":%s,\"rawBytes\":%ld,\"libcBytes\":%ld,"
+                       "{\"arch\":\"%s\",\"svcBypass\":%s,\"rawBytes\":%ld,\"libcBytes\":%ld,\"fopenBytes\":%ld,"
                        "\"rawLines\":%d,\"libcLines\":%d,",
-                       arch, svcUsed ? "true" : "false", rawN, libcN,
+                       arch, svcUsed ? "true" : "false", rawN, libcN, fopenN,
                        yh_count_lines(rawBuf), yh_count_lines(libcBuf));
 
     bool hooked = false, concealed = false;
-    bool rawHas[32] = {false}, libcHas[32] = {false};
+    bool rawHas[32] = {false}, libcHas[32] = {false}, fopenHas[32] = {false};
     for (int i = 0; tokens[i]; i++) {
         rawHas[i] = (rawN > 0) && (strstr(rawBuf, tokens[i]) != nullptr);
         libcHas[i] = (libcN > 0) && (strstr(libcBuf, tokens[i]) != nullptr);
+        fopenHas[i] = fopenBuf && (fopenN > 0) && (strstr(fopenBuf, tokens[i]) != nullptr);
     }
 
     off += snprintf(json + off, sizeof(json) - off, "\"rawHits\":[");
@@ -525,10 +543,20 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
             first = false;
         }
     }
+    off += snprintf(json + off, sizeof(json) - off, "],\"fopenHits\":[");
+    first = true;
+    for (int i = 0; tokens[i]; i++) {
+        if (fopenHas[i]) {
+            off += snprintf(json + off, sizeof(json) - off, "%s\"%s\"",
+                            first ? "" : ",", tokens[i]);
+            first = false;
+        }
+    }
+    // 被隐藏 = inline-svc 看得见，但某条 libc 路径（open 或 fopen）看不见
     off += snprintf(json + off, sizeof(json) - off, "],\"hiddenFromLibc\":[");
     first = true;
     for (int i = 0; tokens[i]; i++) {
-        if (rawHas[i] && !libcHas[i]) {
+        if (rawHas[i] && (!libcHas[i] || !fopenHas[i])) {
             off += snprintf(json + off, sizeof(json) - off, "%s\"%s\"",
                             first ? "" : ",", tokens[i]);
             first = false;
@@ -540,5 +568,6 @@ Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jcla
 
     free(rawBuf);
     free(libcBuf);
+    free(fopenBuf);
     return env->NewStringUTF(json);
 }
