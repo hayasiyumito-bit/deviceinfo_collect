@@ -72,6 +72,26 @@ public final class JniPropertyHelper {
         }
     }
 
+    public static String getInlineSvcMapsProbe() {
+        if (!jniUsable) {
+            return "{\"error\":\"" + JNI_UNAVAILABLE + "\"}";
+        }
+        try {
+            String value = JniInterface.getInlineSvcMapsProbe();
+            if (value == null || value.trim().isEmpty()) {
+                return "{\"error\":\"Error: native inline-svc maps probe returned empty\"}";
+            }
+            return value.trim();
+        } catch (UnsatisfiedLinkError e) {
+            jniUsable = false;
+            Log.w(TAG, "Native inline-svc maps probe failed", e);
+            return "{\"error\":\"" + JNI_UNAVAILABLE + "\"}";
+        } catch (Throwable t) {
+            Log.w(TAG, "Native inline-svc maps probe failed", t);
+            return "{\"error\":\"" + toErrorMessage(t) + "\"}";
+        }
+    }
+
     public static String getProcRedirectProbe() {
         if (!jniUsable) {
             return "{\"error\":\"" + JNI_UNAVAILABLE + "\"}";

@@ -13,10 +13,21 @@ android {
         versionCode 1
         versionName "1.0"
 
+        // 原生风控探针（device.cpp）自 :app 迁入本库，随 AAR 一同分发。
+        // 超集 ABI：兼顾 :app(arm64/x86_64)与 YumyHook 管理器(arm64/armeabi-v7a)两个消费方
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
+        }
         externalNativeBuild {
             cmake {
                 cppFlags ''
             }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
         }
     }
 
@@ -25,6 +36,7 @@ android {
         debug {
             zipAlignEnabled true
             minifyEnabled false
+            consumerProguardFiles 'consumer-rules.pro'
             proguardFiles 'proguard-rules.pro'
             versionNameSuffix '-dev'
             debuggable true
@@ -35,6 +47,8 @@ android {
             // 库不自混淆：由 :app 的 R8 对整个程序统一混淆，避免库先改名导致
             // app 引用 HackChecker/DeviceSnapshot/Cmd 等类时 R8「Missing class」及运行期 NoClassDefFound。
             minifyEnabled false
+            // 随 AAR 传递 JNI/SDK 保留规则给消费方(YumyHook release R8)
+            consumerProguardFiles 'consumer-rules.pro'
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             debuggable false
 
@@ -64,6 +78,9 @@ dependencies {
     //implementation fileTree(dir: 'libs', include: ['*.jar'])
     //implementation("com.android.installreferrer:installreferrer:2.2")
     api 'io.github.maven-rep:json:1.0.0'
+    // AppLocale(随风控类迁入本库)依赖 appcompat/core 的 Locale 兼容 API
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     // 用于交叉核对 GMS Fused 定位路径（Google Maps 等真机 App 走这条，而非 AOSP LocationManager）
     implementation 'com.google.android.gms:play-services-location:21.3.0'

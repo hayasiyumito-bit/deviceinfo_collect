@@ -78,6 +78,11 @@ public final class HideDetectionProbe {
             result.put("procRedirect", redirect);
             detected |= redirect.optBoolean("anomaly", false);
 
+            // inline-svc 直读 maps：绕过 libc Hook，暴露被隐藏的注入库（最强信号）
+            JSONObject svcMaps = probeInlineSvcMaps(reasons);
+            result.put("inlineSvcMaps", svcMaps);
+            detected |= svcMaps.optBoolean("hooked", false);
+
             JSONArray tempArtifacts = scanFilterTempArtifacts(context);
             result.put("filterTempArtifacts", tempArtifacts);
             if (tempArtifacts.length() > 0) {
@@ -132,6 +137,43 @@ public final class HideDetectionProbe {
             reasons.put(com.android.device.i18n.AppLocale.tr("fstat 被 Hook：libc 与原始 syscall 的 st_dev/st_size 不一致，疑似伪造 procfs 句柄", "fstat hooked: libc vs raw syscall st_dev/st_size mismatch, suspected fake procfs handle"));
         }
         return probe;
+    }
+
+    // --- G. inline svc 直读 /proc/self/maps，检出被 libc Hook 隐藏的注入库 ---
+    private static JSONObject probeInlineSvcMaps(JSONArray reasons) throws JSONException {
+        JSONObject probe;
+        String raw = JniPropertyHelper.getInlineSvcMapsProbe();
+        if (raw != null && raw.trim().startsWith("{")) {
+            probe = new JSONObject(raw);
+        } else {
+            probe = new JSONObject();
+            probe.put("raw", raw != null ? raw : "");
+        }
+        JSONArray hidden = probe.optJSONArray("hiddenFromLibc");
+        JSONArray rawHits = probe.optJSONArray("rawHits");
+        if (probe.optBoolean("concealed", false) && hidden != null && hidden.length() > 0) {
+            // inline svc 看得见、libc 看不见 → 模块正在主动隐藏自己的注入
+            reasons.put(com.android.device.i18n.AppLocale.tr(
+                    "Hook 注入被隐藏（inline-svc 绕过 libc 过滤后暴露）: ",
+                    "Hook injection concealed (exposed via inline-svc bypassing libc filter): ")
+                    + join(hidden));
+        } else if (probe.optBoolean("hooked", false) && rawHits != null && rawHits.length() > 0) {
+            // 注入库存在（未被隐藏或未过滤）
+            reasons.put(com.android.device.i18n.AppLocale.tr(
+                    "检测到 Hook 注入库（/proc/self/maps）: ",
+                    "Hook injection library detected (/proc/self/maps): ")
+                    + join(rawHits));
+        }
+        return probe;
+    }
+
+    private static String join(JSONArray arr) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < arr.length(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(arr.optString(i));
+        }
+        return sb.toString();
     }
 
     // --- F. 过滤临时文件残留扫描 ---

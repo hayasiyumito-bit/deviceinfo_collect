@@ -27,4 +27,7 @@ public class JniInterface {
 
     /** Native 层 /proc 重定向探测：readlink(fd) / fstat 设备号 / stat 大小一致性（JSON）。 */
     public static native String getProcRedirectProbe();
+
+    /** inline svc 直读 /proc/self/maps 原文，绕过对 libc open/read 的 Hook，检出被隐藏的注入库。 */
+    public static native String getInlineSvcMapsProbe();
 }

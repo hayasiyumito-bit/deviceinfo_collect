@@ -11,8 +11,8 @@ android {
         applicationId 'com.android.device'
         minSdk 24
         targetSdk 34
-        versionCode 2
-        versionName "2.0"
+        versionCode 3
+        versionName "3.0"
 
         buildConfigField "String", "PROVENANCE_FINGERPRINT", "\"YDC-7F3A9C2E-202607\""
         buildConfigField "String", "PROVENANCE_PROJECT_ID", "\"device-collection\""
@@ -56,12 +56,8 @@ android {
             useLegacyPackaging true
         }
     }
-    externalNativeBuild {
-        cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.22.1'
-        }
-    }
+    // 原生风控库（libdevice.so）已迁入 :collections，随其 AAR 传递进来，
+    // :app 不再本地编译 CMake。
 }
 
 dependencies {

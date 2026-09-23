@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <cstdlib>
 
 #define LOG_TAG "SensorHelper"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
@@ -389,5 +390,155 @@ Java_com_android_device_Jni_JniInterface_getMagiskNativeProbe(JNIEnv *env, jclas
     append_keyword_hits("/proc/self/mountinfo", kNativeMagiskKeywords, json + offset,
                         sizeof(json) - offset);
     strncat(json, "}", sizeof(json) - strlen(json) - 1);
+    return env->NewStringUTF(json);
+}
+
+// ============================================================================
+// 反 Hook 终极探针：用 inline svc 系统调用直接读取 /proc/self/maps 原文，
+// 绕过反检测模块对 libc open/openat/read 的符号级 Hook（如 YumyHook 的
+// shadowhook + 读过滤/临时文件重定向），把被隐藏的注入库暴露出来。
+// 只 Hook libc 符号的模块无法拦截真正的 svc #0，故 inline-svc 读到的是内核真相。
+// ============================================================================
+#if defined(__aarch64__)
+static inline long yh_svc(long nr, long a0, long a1, long a2, long a3) {
+    register long x8 asm("x8") = nr;
+    register long x0 asm("x0") = a0;
+    register long x1 asm("x1") = a1;
+    register long x2 asm("x2") = a2;
+    register long x3 asm("x3") = a3;
+    asm volatile("svc #0" : "+r"(x0) : "r"(x8), "r"(x1), "r"(x2), "r"(x3)
+                 : "memory", "cc");
+    return x0;
+}
+#define YH_HAVE_SVC 1
+#define YH_NR_OPENAT 56
+#define YH_NR_READ   63
+#define YH_NR_CLOSE  57
+#endif
+
+// 读取整文件到 buf（末尾补 '\0'）。useSvc=true 走 inline svc（绕 libc），
+// 否则走 libc open/read（即反检测模块看得见、会过滤的那条路）。返回字节数，失败 -1。
+static long yh_read_file_all(const char *path, char *buf, long cap, bool useSvc) {
+    int fd = -1;
+#ifdef YH_HAVE_SVC
+    if (useSvc) {
+        fd = (int) yh_svc(YH_NR_OPENAT, (long) -100 /*AT_FDCWD*/, (long) path,
+                          (long) (O_RDONLY | O_CLOEXEC), 0);
+    } else
+#endif
+    {
+        fd = open(path, O_RDONLY | O_CLOEXEC);
+    }
+    if (fd < 0) return -1;
+
+    long total = 0;
+    while (total < cap - 1) {
+        long n;
+#ifdef YH_HAVE_SVC
+        if (useSvc) {
+            n = yh_svc(YH_NR_READ, fd, (long) (buf + total), (long) (cap - 1 - total), 0);
+        } else
+#endif
+        {
+            n = (long) read(fd, buf + total, (size_t) (cap - 1 - total));
+        }
+        if (n <= 0) break;
+        total += n;
+    }
+    buf[total > 0 ? total : 0] = '\0';
+
+#ifdef YH_HAVE_SVC
+    if (useSvc) yh_svc(YH_NR_CLOSE, fd, 0, 0, 0);
+    else
+#endif
+    close(fd);
+    return total;
+}
+
+static int yh_count_lines(const char *s) {
+    int c = 0;
+    for (const char *p = s; *p; ++p) if (*p == '\n') c++;
+    return c;
+}
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_android_device_Jni_JniInterface_getInlineSvcMapsProbe(JNIEnv *env, jclass clazz) {
+    (void) clazz;
+    const long CAP = 2 * 1024 * 1024;
+    char *rawBuf = (char *) malloc(CAP);
+    char *libcBuf = (char *) malloc(CAP);
+    if (!rawBuf || !libcBuf) {
+        free(rawBuf);
+        free(libcBuf);
+        return env->NewStringUTF("{\"error\":\"oom\"}");
+    }
+
+#ifdef YH_HAVE_SVC
+    const char *arch = "aarch64";
+    bool svcUsed = true;
+#else
+    const char *arch = "other";
+    bool svcUsed = false;  // 非 aarch64 退化为 libc（无 svc 旁路，仅尽力而为）
+#endif
+    long rawN = yh_read_file_all("/proc/self/maps", rawBuf, CAP, svcUsed);
+    long libcN = yh_read_file_all("/proc/self/maps", libcBuf, CAP, false);
+
+    // 注入指纹：YumyHook 原生库 / shadowhook 引擎 / LSPosed / Zygisk / Riru / Xposed
+    static const char *tokens[] = {
+            "libyumyhook_native.so", "yumyhook_native", "libshadowhook.so",
+            "shadowhook-enter", "shadowhook-exit", "shadowhook-hub",
+            "com.yumito.yumyhook", "/data/adb/lspd", "zygisk", "riru",
+            "libxposed", nullptr
+    };
+
+    char json[8192];
+    int off = snprintf(json, sizeof(json),
+                       "{\"arch\":\"%s\",\"svcBypass\":%s,\"rawBytes\":%ld,\"libcBytes\":%ld,"
+                       "\"rawLines\":%d,\"libcLines\":%d,",
+                       arch, svcUsed ? "true" : "false", rawN, libcN,
+                       yh_count_lines(rawBuf), yh_count_lines(libcBuf));
+
+    bool hooked = false, concealed = false;
+    bool rawHas[32] = {false}, libcHas[32] = {false};
+    for (int i = 0; tokens[i]; i++) {
+        rawHas[i] = (rawN > 0) && (strstr(rawBuf, tokens[i]) != nullptr);
+        libcHas[i] = (libcN > 0) && (strstr(libcBuf, tokens[i]) != nullptr);
+    }
+
+    off += snprintf(json + off, sizeof(json) - off, "\"rawHits\":[");
+    bool first = true;
+    for (int i = 0; tokens[i]; i++) {
+        if (rawHas[i]) {
+            off += snprintf(json + off, sizeof(json) - off, "%s\"%s\"",
+                            first ? "" : ",", tokens[i]);
+            first = false;
+            hooked = true;
+        }
+    }
+    off += snprintf(json + off, sizeof(json) - off, "],\"libcHits\":[");
+    first = true;
+    for (int i = 0; tokens[i]; i++) {
+        if (libcHas[i]) {
+            off += snprintf(json + off, sizeof(json) - off, "%s\"%s\"",
+                            first ? "" : ",", tokens[i]);
+            first = false;
+        }
+    }
+    off += snprintf(json + off, sizeof(json) - off, "],\"hiddenFromLibc\":[");
+    first = true;
+    for (int i = 0; tokens[i]; i++) {
+        if (rawHas[i] && !libcHas[i]) {
+            off += snprintf(json + off, sizeof(json) - off, "%s\"%s\"",
+                            first ? "" : ",", tokens[i]);
+            first = false;
+            concealed = true;
+        }
+    }
+    snprintf(json + off, sizeof(json) - off, "],\"hooked\":%s,\"concealed\":%s}",
+             hooked ? "true" : "false", concealed ? "true" : "false");
+
+    free(rawBuf);
+    free(libcBuf);
     return env->NewStringUTF(json);
 }
