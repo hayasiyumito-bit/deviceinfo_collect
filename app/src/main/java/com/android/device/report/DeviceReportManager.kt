@@ -1,7 +1,6 @@
 package com.android.device.report
 
 import android.content.Context
-import android.util.Log
 import com.android.device.BuildConfig
 import com.android.device.sdk.DeviceCollectSdk
 import com.android.device.sdk.ReportConfig
@@ -18,8 +17,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  * 纯后台、静态上报，不关心返回值（服务端返回 204 空响应）。每个进程仅触发一次。
  */
 object DeviceReportManager {
-
-    private const val TAG = "DeviceReportManager"
 
     /** 采集 App 的来源标识。 */
     private const val SOURCE = "collect_app"
@@ -58,14 +55,10 @@ object DeviceReportManager {
                     .source(SOURCE)
                     .gzip(GZIP)
                     .includeRisk(INCLUDE_RISK)
-                val result = DeviceCollectSdk.collectAndReport(appContext, cfg)
-                if (result.ok) {
-                    Log.i(TAG, "device report ok: $result")
-                } else {
-                    Log.w(TAG, "device report failed: $result")
-                }
-            } catch (t: Throwable) {
-                Log.w(TAG, "device report crashed", t)
+                // 后台静默上报：成功/失败/超时都不打日志（与 YumyHook 上报逻辑一致，仅 source 参数区分来源）。
+                DeviceCollectSdk.collectAndReport(appContext, cfg)
+            } catch (_: Throwable) {
+                // 静默：采集/上报异常不打日志、不影响 App。
             }
         }
     }
