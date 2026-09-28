@@ -106,8 +106,17 @@ public final class DeviceCollectSdk {
                 envelope.put("source", config.source());
             }
             envelope.put("collected_at", payload.optLong("collectedAt", System.currentTimeMillis()));
-            envelope.put("any_risk", payload.optBoolean("anyRisk", false));
-            envelope.put("risk_reasons", payload.optJSONArray("anyRiskReasons"));
+            // 风控字段仅在真正采集过 security 时写入。未采集时绝不能写 any_risk=false——
+            // 服务端会把「未检测」当成「无风险」，风险统计被 yumyhook 这类快照-only 上报稀释。
+            boolean riskCollected = payload.has("anyRisk") && !payload.isNull("anyRisk");
+            envelope.put("risk_collected", riskCollected);
+            if (riskCollected) {
+                envelope.put("any_risk", payload.optBoolean("anyRisk", false));
+                envelope.put("risk_reasons", payload.optJSONArray("anyRiskReasons"));
+            } else {
+                envelope.put("any_risk", JSONObject.NULL);
+                envelope.put("risk_reasons", JSONObject.NULL);
+            }
             envelope.put("payload", payload);
         } catch (Exception e) {
             return new ReportClient.Result(false, -1, "envelope build failed: " + e.getMessage());
