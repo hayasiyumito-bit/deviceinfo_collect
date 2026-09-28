@@ -17,6 +17,7 @@ public final class ReportConfig {
     private final String baseUrl;
     private final String apiKey;
     private String reportPath = "/api/v1/report";
+    private String crashPath = "/api/v1/crash";
     private String appPackage;
     private String appVersion;
     private String source;
@@ -41,6 +42,7 @@ public final class ReportConfig {
     }
 
     public ReportConfig reportPath(String path) { this.reportPath = path; return this; }
+    public ReportConfig crashPath(String path) { this.crashPath = path; return this; }
     public ReportConfig appPackage(String pkg) { this.appPackage = pkg; return this; }
     public ReportConfig appVersion(String ver) { this.appVersion = ver; return this; }
 
@@ -64,6 +66,7 @@ public final class ReportConfig {
     public ReportConfig rootProbeWaitMs(long ms) { this.rootProbeWaitMs = ms; return this; }
 
     public String endpoint() { return baseUrl + reportPath; }
+    public String crashEndpoint() { return baseUrl + crashPath; }
     public String apiKey() { return apiKey; }
     public String appPackage() { return appPackage; }
     public String appVersion() { return appVersion; }

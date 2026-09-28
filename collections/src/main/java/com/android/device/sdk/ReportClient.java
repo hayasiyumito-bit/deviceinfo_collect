@@ -38,6 +38,11 @@ public final class ReportClient {
     }
 
     static Result post(ReportConfig config, JSONObject envelope) {
+        return postTo(config, config.endpoint(), envelope);
+    }
+
+    /** 同 {@link #post} 的鉴权/gzip 管线，但 POST 到指定 URL（如崩溃上报的 {@code /api/v1/crash}）。 */
+    static Result postTo(ReportConfig config, String endpoint, JSONObject envelope) {
         HttpURLConnection conn = null;
         try {
             byte[] body = envelope.toString().getBytes("UTF-8");
@@ -50,7 +55,7 @@ public final class ReportClient {
                 body = bos.toByteArray();
             }
 
-            URL url = new URL(config.endpoint());
+            URL url = new URL(endpoint);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(config.connectTimeoutMs());
